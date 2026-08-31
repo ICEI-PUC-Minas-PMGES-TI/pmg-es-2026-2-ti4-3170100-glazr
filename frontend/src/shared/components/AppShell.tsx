@@ -6,9 +6,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { logout, user } = useAuth()
   return <main className="workflow-page">
     <header className="workflow-header">
-      <Link className="brand brand--compact" to="/"><span className="brand__mark">G</span><span>Glazr</span></Link>
+      <Link className="brand brand--compact" to="/dashboard"><span className="brand__mark">G</span><span>Glazr</span></Link>
       <nav aria-label="Navegação principal">
-        <Link to="/">Início</Link>
+        <Link to="/dashboard">Início</Link>
         {user?.permissions.includes('USER_READ') ? <Link to="/admin/users">Funcionários</Link> : null}
         <Link to="/account/security">Segurança</Link>
         <button className="button button--secondary" type="button" onClick={() => void logout()}>Sair</button>

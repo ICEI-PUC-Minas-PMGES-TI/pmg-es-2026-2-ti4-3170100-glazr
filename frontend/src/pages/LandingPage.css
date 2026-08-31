@@ -1,0 +1,433 @@
+/* =====================================================
+   LandingPage.css  — Glazr
+   Estilo: vidro + tiles quadrados colados (sem arredondamento)
+   ===================================================== */
+
+/* ── Reset scoped ── */
+.lp-root {
+  min-height: 100vh;
+  color: var(--color-text);
+  background: var(--color-background);
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── Containers ── */
+.lp-container {
+  width: min(100%, 72rem);
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+}
+
+/* ── NAV ── */
+.lp-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--color-border);
+  background: rgb(245 248 251 / 88%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.lp-nav__inner {
+  width: min(100%, 72rem);
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 3.75rem;
+}
+
+/* ── Brand ── */
+.lp-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 1.35rem;
+  font-weight: 780;
+  letter-spacing: -0.03em;
+  color: var(--color-blue-900);
+}
+
+.lp-brand__mark {
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 30%);
+  /* NO border-radius — design quadrado */
+  color: #fff;
+  background: var(--color-blue-700);
+  box-shadow: 0 6px 18px rgb(47 85 127 / 22%);
+  font-size: 1rem;
+  font-weight: 820;
+}
+
+.lp-brand__mark--sm {
+  width: 1.7rem;
+  height: 1.7rem;
+  font-size: 0.85rem;
+}
+
+/* ── Eyebrow ── */
+.lp-eyebrow {
+  margin-bottom: 0.7rem;
+  color: var(--color-blue-500);
+  font-size: 0.72rem;
+  font-weight: 820;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.lp-eyebrow--light {
+  color: var(--color-blue-100);
+}
+
+/* ── Buttons ── */
+.lp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.3rem;
+  font-size: 0.9rem;
+  font-weight: 720;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition:
+    background 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.lp-btn:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.lp-btn--primary {
+  color: #fff;
+  background: var(--color-blue-700);
+  box-shadow: 0 8px 22px rgb(47 85 127 / 26%);
+}
+
+.lp-btn--primary:hover {
+  background: var(--color-blue-900);
+  box-shadow: 0 12px 28px rgb(47 85 127 / 34%);
+}
+
+.lp-btn--ghost {
+  color: var(--color-blue-700);
+  border-color: var(--color-border);
+  background: transparent;
+}
+
+.lp-btn--ghost:hover {
+  background: var(--color-blue-050);
+}
+
+.lp-btn--lg {
+  padding: 0.9rem 2.2rem;
+  font-size: 1rem;
+}
+
+/* ── HERO ── */
+.lp-hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(5rem, 10vw, 9rem) clamp(1rem, 4vw, 3rem) clamp(4rem, 8vw, 7rem);
+  background:
+    radial-gradient(circle at 80% -5%, rgb(127 166 201 / 38%) 0 14rem, transparent 14.1rem),
+    radial-gradient(circle at 5% 110%, rgb(85 125 164 / 30%) 0 20rem, transparent 20.1rem),
+    linear-gradient(155deg, var(--color-blue-950) 0%, var(--color-blue-700) 100%);
+  color: #fff;
+}
+
+.lp-hero__inner {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 56rem);
+  margin: 0 auto;
+}
+
+.lp-hero__title {
+  margin: 0 0 1.25rem;
+  font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+  font-weight: 820;
+  line-height: 1.06;
+  letter-spacing: -0.045em;
+}
+
+.lp-hero__sub {
+  max-width: 38rem;
+  margin: 0 0 2.25rem;
+  color: rgb(255 255 255 / 78%);
+  font-size: clamp(1rem, 2vw, 1.12rem);
+  line-height: 1.65;
+}
+
+.lp-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* Decorative grid overlay in hero */
+.lp-hero__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px);
+  background-size: 3.5rem 3.5rem;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ── Sections shared ── */
+.lp-section {
+  padding: clamp(3.5rem, 7vw, 6rem) 0;
+}
+
+.lp-section__title {
+  margin: 0 0 2.5rem;
+  font-size: clamp(1.7rem, 3.2vw, 2.6rem);
+  font-weight: 780;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  color: var(--color-blue-950);
+}
+
+.lp-section__title--light {
+  color: #fff;
+}
+
+/* ── FEATURES — tiles quadrados colados como vidro ── */
+.lp-features-section {
+  background: var(--color-background);
+}
+
+.lp-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* sem gap = tiles colados */
+  gap: 0;
+  border: 1px solid var(--color-border);
+}
+
+.lp-feature-card {
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  /* Efeito vidro: leve transparência e blur no hover */
+  transition: background 180ms ease;
+}
+
+.lp-feature-card:hover {
+  background: var(--color-blue-050);
+}
+
+/* Remove borda dupla nas arestas */
+.lp-feature-card:nth-child(3n) {
+  border-right: none;
+}
+
+.lp-feature-card:nth-last-child(-n+3):nth-child(3n+1),
+.lp-feature-card:nth-last-child(-n+3):nth-child(3n+2),
+.lp-feature-card:nth-last-child(-n+3):nth-child(3n) {
+  border-bottom: none;
+}
+
+/* Fallback: remove bottom border from last row */
+.lp-feature-card:nth-last-child(1),
+.lp-feature-card:nth-last-child(2),
+.lp-feature-card:nth-last-child(3) {
+  border-bottom: none;
+}
+
+.lp-feature-card__icon {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: var(--color-blue-700);
+}
+
+.lp-feature-card__title {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+  font-weight: 740;
+  color: var(--color-blue-900);
+  letter-spacing: -0.015em;
+}
+
+.lp-feature-card__desc {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--color-text-muted);
+}
+
+/* ── STEPS ── */
+.lp-steps-section {
+  background:
+    radial-gradient(circle at 90% 10%, rgb(127 166 201 / 20%) 0 16rem, transparent 16.1rem),
+    linear-gradient(150deg, var(--color-blue-950), var(--color-blue-700));
+  color: #fff;
+}
+
+.lp-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border: 1px solid rgb(255 255 255 / 14%);
+}
+
+.lp-step {
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border-right: 1px solid rgb(255 255 255 / 14%);
+  /* Efeito vidro */
+  background: rgb(255 255 255 / 4%);
+  backdrop-filter: blur(2px);
+  transition: background 180ms ease;
+}
+
+.lp-step:last-child {
+  border-right: none;
+}
+
+.lp-step:hover {
+  background: rgb(255 255 255 / 8%);
+}
+
+.lp-step__num {
+  display: block;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  font-weight: 820;
+  letter-spacing: -0.05em;
+  color: rgb(255 255 255 / 30%);
+  line-height: 1;
+}
+
+.lp-step__label {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: rgb(255 255 255 / 80%);
+}
+
+/* ── CTA ── */
+.lp-cta-section {
+  background: var(--color-blue-050);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.lp-cta-inner {
+  text-align: center;
+}
+
+.lp-cta__title {
+  margin: 0 0 1rem;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 780;
+  letter-spacing: -0.03em;
+  color: var(--color-blue-950);
+}
+
+.lp-cta__sub {
+  margin: 0 auto 2rem;
+  max-width: 36rem;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
+/* ── FOOTER ── */
+.lp-footer {
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-background);
+}
+
+.lp-footer__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 720;
+  color: var(--color-blue-900);
+}
+
+.lp-footer__copy {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+/* ── Responsive ── */
+@media (max-width: 56rem) {
+  .lp-feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Recalculate borders for 2-column layout */
+  .lp-feature-card:nth-child(3n) {
+    border-right: 1px solid var(--color-border);
+  }
+
+  .lp-feature-card:nth-last-child(1),
+  .lp-feature-card:nth-last-child(2),
+  .lp-feature-card:nth-last-child(3) {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .lp-feature-card:nth-child(2n) {
+    border-right: none;
+  }
+
+  .lp-feature-card:nth-last-child(1),
+  .lp-feature-card:nth-last-child(2) {
+    border-bottom: none;
+  }
+
+  .lp-steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .lp-step:nth-child(2n) {
+    border-right: none;
+  }
+
+  .lp-step:nth-child(1),
+  .lp-step:nth-child(2) {
+    border-bottom: 1px solid rgb(255 255 255 / 14%);
+  }
+}
+
+@media (max-width: 36rem) {
+  .lp-feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-feature-card {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .lp-feature-card:last-child {
+    border-bottom: none;
+  }
+
+  .lp-steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-step {
+    border-right: none;
+    border-bottom: 1px solid rgb(255 255 255 / 14%);
+  }
+
+  .lp-step:last-child {
+    border-bottom: none;
+  }
+}

@@ -59,7 +59,7 @@ it('entra com sessão e CSRF válidos', async () => {
   await user.click(screen.getByRole('button', { name: 'Entrar' }))
 
   expect(await screen.findByText('Olá, Gestor da Vidraçaria')).toBeInTheDocument()
-  expect(window.location.pathname).toBe('/')
+  expect(window.location.pathname).toBe('/dashboard')
 })
 
 it('mostra erro genérico e limpa a senha quando as credenciais são inválidas', async () => {
@@ -98,7 +98,8 @@ it('mostra erro genérico e limpa a senha quando as credenciais são inválidas'
   expect(password).toHaveValue('')
 })
 
-it('redireciona visitante sem sessão para o login', async () => {
+it('redireciona visitante sem sessão para o login ao acessar rota protegida', async () => {
+  window.history.replaceState({}, '', '/dashboard')
   server.use(
     http.get('http://localhost/api/v1/auth/me', () =>
       HttpResponse.json(authenticationRequired, { status: 401 }),
@@ -112,6 +113,7 @@ it('redireciona visitante sem sessão para o login', async () => {
 })
 
 it('restaura a sessão e encerra o acesso usando CSRF', async () => {
+  window.history.replaceState({}, '', '/dashboard')
   server.use(
     http.get('http://localhost/api/v1/auth/me', () => HttpResponse.json(authenticatedUser)),
     http.get('http://localhost/api/v1/auth/csrf', () =>
