@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 
 import { UserSummary } from '../features/auth/components/UserSummary'
+import './HomePage.css'
 
 export function HomePage() {
   return (

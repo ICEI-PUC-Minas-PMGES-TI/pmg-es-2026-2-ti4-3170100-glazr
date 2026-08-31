@@ -1,4 +1,5 @@
 import { useAuth } from '../hooks/use-auth'
+import './UserSummary.css'
 
 export function UserSummary() {
   const { isSubmitting, logout, user } = useAuth()
