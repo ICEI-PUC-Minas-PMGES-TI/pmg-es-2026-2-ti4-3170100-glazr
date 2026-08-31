@@ -15,6 +15,7 @@ import com.glazr.user.domain.EmailAddress;
 import com.glazr.user.infrastructure.UserEntity;
 import com.glazr.user.infrastructure.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,9 +59,16 @@ public class GoogleIdentityService {
             ExternalIdentityEntity existingForUser = identities
                     .findByUserIdAndProviderForUpdate(user.getId(), ExternalIdentityEntity.GOOGLE).orElse(null);
             if (existingForUser != null && !existingForUser.getSubject().equals(subject)) throw alreadyLinked();
-            identity = existingForUser == null
-                    ? identities.save(ExternalIdentityEntity.linkGoogle(user.getId(), subject, email, now))
-                    : existingForUser;
+            if (existingForUser == null) {
+                try {
+                    identity = identities.saveAndFlush(
+                            ExternalIdentityEntity.linkGoogle(user.getId(), subject, email, now));
+                } catch (DataIntegrityViolationException exception) {
+                    throw alreadyLinked();
+                }
+            } else {
+                identity = existingForUser;
+            }
         }
         identity.recordLogin(now);
         consumeInvitationIfPresent(user.getId(), invitationId, now);

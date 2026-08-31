@@ -4,6 +4,7 @@ import com.glazr.authentication.infrastructure.ActiveUserSessionFilter;
 import com.glazr.shared.api.SecurityProblemWriter;
 import com.glazr.google.infrastructure.GoogleAuthenticationFailureHandler;
 import com.glazr.google.infrastructure.GoogleAuthenticationSuccessHandler;
+import com.glazr.google.infrastructure.DiscardingOAuth2AuthorizedClientRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -43,6 +45,11 @@ public class SecurityConfiguration {
 
     @Bean
     SecurityContextRepository securityContextRepository() { return new HttpSessionSecurityContextRepository(); }
+
+    @Bean
+    OAuth2AuthorizedClientRepository oauth2AuthorizedClientRepository() {
+        return new DiscardingOAuth2AuthorizedClientRepository();
+    }
 
     @Bean
     CookieSerializer cookieSerializer(@Value("${glazr.cookie.secure:false}") boolean secure) {
@@ -78,6 +85,7 @@ public class SecurityConfiguration {
                                             SecurityProblemWriter problems,
                                             GoogleAuthenticationSuccessHandler googleSuccess,
                                             GoogleAuthenticationFailureHandler googleFailure,
+                                            OAuth2AuthorizedClientRepository authorizedClients,
                                             @Qualifier("corsConfigurationSource") CorsConfigurationSource corsSource,
                                             @Value("${glazr.cookie.secure:false}") boolean secure,
                                             @Value("${glazr.google-auth-enabled:false}") boolean googleEnabled) throws Exception {
@@ -123,7 +131,10 @@ public class SecurityConfiguration {
                                 response.setStatus(HttpServletResponse.SC_NO_CONTENT)))
                 .addFilterBefore(activeUserFilter, AuthorizationFilter.class);
         if (googleEnabled) {
-            http.oauth2Login(oauth -> oauth.successHandler(googleSuccess).failureHandler(googleFailure));
+            http.oauth2Login(oauth -> oauth
+                    .authorizedClientRepository(authorizedClients)
+                    .successHandler(googleSuccess)
+                    .failureHandler(googleFailure));
         }
         return http.build();
     }
