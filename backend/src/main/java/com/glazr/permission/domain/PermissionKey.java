@@ -1,0 +1,14 @@
+package com.glazr.permission.domain;
+
+public enum PermissionKey {
+    USER_READ,
+    USER_CREATE,
+    USER_UPDATE,
+    USER_STATUS_UPDATE,
+    ACCESS_PROFILE_READ,
+    ACCESS_PROFILE_CREATE,
+    ACCESS_PROFILE_UPDATE,
+    ACCESS_PROFILE_DELETE,
+    ACCESS_PROFILE_ASSIGN,
+    PERMISSION_READ
+}
