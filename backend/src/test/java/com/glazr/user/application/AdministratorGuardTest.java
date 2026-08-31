@@ -22,7 +22,8 @@ class AdministratorGuardTest {
         AccessProfileRepository profiles = mock(AccessProfileRepository.class);
         AccessProfileEntity administrator = mock(AccessProfileEntity.class);
         when(administrator.getId()).thenReturn(AccessProfileEntity.ADMINISTRATOR_ID);
-        UserEntity user = UserEntity.create("admin@glazr.local", "Admin", "hash", Set.of(administrator), Instant.EPOCH);
+        UserEntity user = UserEntity.createEmployee(
+                "admin@glazr.local", "Admin", Set.of(administrator), Instant.EPOCH);
         when(users.countActiveByProfileId(AccessProfileEntity.ADMINISTRATOR_ID)).thenReturn(1L);
         when(profiles.findByIdForUpdate(AccessProfileEntity.ADMINISTRATOR_ID))
                 .thenReturn(Optional.of(administrator));

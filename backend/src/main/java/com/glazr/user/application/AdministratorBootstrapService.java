@@ -7,6 +7,8 @@ import com.glazr.permission.infrastructure.PermissionRepository;
 import com.glazr.user.domain.PasswordPolicy;
 import com.glazr.user.infrastructure.UserEntity;
 import com.glazr.user.infrastructure.UserRepository;
+import com.glazr.credential.infrastructure.PasswordCredentialEntity;
+import com.glazr.credential.infrastructure.PasswordCredentialRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,15 +27,17 @@ public class AdministratorBootstrapService {
     private final AccessProfileRepository profiles;
     private final PermissionRepository permissions;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordCredentialRepository passwordCredentials;
     private final Clock clock;
 
     public AdministratorBootstrapService(UserRepository users, AccessProfileRepository profiles,
                                          PermissionRepository permissions, PasswordEncoder passwordEncoder,
-                                         Clock clock) {
+                                         PasswordCredentialRepository passwordCredentials, Clock clock) {
         this.users = users;
         this.profiles = profiles;
         this.permissions = permissions;
         this.passwordEncoder = passwordEncoder;
+        this.passwordCredentials = passwordCredentials;
         this.clock = clock;
     }
 
@@ -48,9 +52,12 @@ public class AdministratorBootstrapService {
         if (administrator.getPermissions().size() != permissions.count()) {
             throw new IllegalStateException("Perfil ADMINISTRADOR não contém todo o catálogo de permissões");
         }
-        UserEntity user = UserEntity.create(credentials.email(), credentials.name(),
-                passwordEncoder.encode(credentials.password()), Set.of(administrator), clock.instant());
+        var now = clock.instant();
+        UserEntity user = UserEntity.createEmployee(
+                credentials.email(), credentials.name(), Set.of(administrator), now);
         users.saveAndFlush(user);
+        passwordCredentials.save(PasswordCredentialEntity.create(
+                user.getId(), passwordEncoder.encode(credentials.password()), now));
         return Outcome.CREATED;
     }
 }

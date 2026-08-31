@@ -95,7 +95,7 @@ class BackendIntegrationTest {
                 where access_profile_id = '00000000-0000-0000-0000-000000000001'
                 """, Integer.class);
 
-        assertThat(migrations).isEqualTo(3);
+        assertThat(migrations).isEqualTo(5);
         assertThat(permissions).isEqualTo(10);
         assertThat(adminPermissions).isEqualTo(10);
     }
@@ -348,10 +348,15 @@ class BackendIntegrationTest {
         UUID id = UUID.randomUUID();
         jdbc.update("""
                 insert into users
-                    (id, email, display_name, password_hash, active, failed_login_attempts, created_at, updated_at, version)
-                values (?, ?, 'Teste', ?, true, 0,
+                    (id, email, display_name, account_type, active, failed_login_attempts, created_at, updated_at, version)
+                values (?, ?, 'Teste', 'EMPLOYEE', true, 0,
                         current_timestamp, current_timestamp, 0)
-                """, id, email, passwordHash);
+                """, id, email);
+        jdbc.update("""
+                insert into user_password_credentials
+                    (user_id, password_hash, password_changed_at, created_at, updated_at)
+                values (?, ?, current_timestamp, current_timestamp, current_timestamp)
+                """, id, passwordHash);
         return id;
     }
 }

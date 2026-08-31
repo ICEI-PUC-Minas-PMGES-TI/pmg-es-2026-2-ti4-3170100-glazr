@@ -12,6 +12,10 @@ import com.glazr.user.domain.EmailAddress;
 import com.glazr.user.domain.PasswordPolicy;
 import com.glazr.user.infrastructure.UserEntity;
 import com.glazr.user.infrastructure.UserRepository;
+import com.glazr.credential.infrastructure.PasswordCredentialEntity;
+import com.glazr.credential.infrastructure.PasswordCredentialRepository;
+import com.glazr.credential.infrastructure.ExternalIdentityEntity;
+import com.glazr.credential.infrastructure.ExternalIdentityRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,16 +34,21 @@ public class UserManagementService {
     private final UserRepository users;
     private final AccessProfileRepository profiles;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordCredentialRepository passwordCredentials;
+    private final ExternalIdentityRepository externalIdentities;
     private final AdministratorGuard administratorGuard;
     private final UserSessionService sessions;
     private final Clock clock;
 
     public UserManagementService(UserRepository users, AccessProfileRepository profiles,
-                                 PasswordEncoder passwordEncoder, AdministratorGuard administratorGuard,
+                                 PasswordEncoder passwordEncoder, PasswordCredentialRepository passwordCredentials,
+                                 ExternalIdentityRepository externalIdentities, AdministratorGuard administratorGuard,
                                  UserSessionService sessions, Clock clock) {
         this.users = users;
         this.profiles = profiles;
         this.passwordEncoder = passwordEncoder;
+        this.passwordCredentials = passwordCredentials;
+        this.externalIdentities = externalIdentities;
         this.administratorGuard = administratorGuard;
         this.sessions = sessions;
         this.clock = clock;
@@ -54,22 +63,25 @@ public class UserManagementService {
         }
         PasswordPolicy.validate(request.password());
         Set<AccessProfileEntity> resolvedProfiles = resolveProfiles(request.accessProfileIds());
-        UserEntity user = UserEntity.create(email, request.displayName(), passwordEncoder.encode(request.password()),
-                resolvedProfiles, clock.instant());
-        return UserResponse.from(users.saveAndFlush(user));
+        var now = clock.instant();
+        UserEntity user = UserEntity.createEmployee(email, request.displayName(), resolvedProfiles, now);
+        users.saveAndFlush(user);
+        passwordCredentials.save(PasswordCredentialEntity.create(
+                user.getId(), passwordEncoder.encode(request.password()), now));
+        return toResponse(user);
     }
 
     @PreAuthorize("hasAuthority('USER_READ')")
     @Transactional(readOnly = true)
     public Page<UserResponse> list(String query, Boolean active, Pageable pageable) {
         String normalizedQuery = query == null || query.isBlank() ? null : query.strip();
-        return users.search(normalizedQuery, active, pageable).map(UserResponse::from);
+        return users.search(normalizedQuery, active, pageable).map(this::toResponse);
     }
 
     @PreAuthorize("hasAuthority('USER_READ')")
     @Transactional(readOnly = true)
     public UserResponse get(UUID id) {
-        return UserResponse.from(requireUser(id));
+        return toResponse(requireUser(id));
     }
 
     @PreAuthorize("hasAuthority('USER_UPDATE') and (#request.accessProfileIds() == null or hasAuthority('ACCESS_PROFILE_ASSIGN'))")
@@ -88,7 +100,7 @@ public class UserManagementService {
                     .ifPresent(existing -> { throw new ConflictException("DUPLICATE_EMAIL", "Já existe um usuário com este e-mail"); });
         }
         user.update(request.email(), request.displayName(), resolved, clock.instant());
-        return UserResponse.from(users.saveAndFlush(user));
+        return toResponse(users.saveAndFlush(user));
     }
 
     @PreAuthorize("hasAuthority('USER_STATUS_UPDATE')")
@@ -97,13 +109,22 @@ public class UserManagementService {
         UserEntity user = requireUser(id);
         if (!active) administratorGuard.assertMayDeactivate(user);
         user.updateStatus(active, clock.instant());
-        UserResponse response = UserResponse.from(users.saveAndFlush(user));
+        UserResponse response = toResponse(users.saveAndFlush(user));
         if (!active) sessions.deleteSessions(id);
         return response;
     }
 
     private UserEntity requireUser(UUID id) {
         return users.findById(id).orElseThrow(() -> new ResourceNotFoundException("Usuário"));
+    }
+
+    private UserResponse toResponse(UserEntity user) {
+        java.util.List<String> methods = new java.util.ArrayList<>();
+        if (passwordCredentials.existsById(user.getId())) methods.add("PASSWORD");
+        if (externalIdentities.existsByUserIdAndProvider(user.getId(), ExternalIdentityEntity.GOOGLE)) {
+            methods.add("GOOGLE");
+        }
+        return UserResponse.from(user, methods);
     }
 
     private Set<AccessProfileEntity> resolveProfiles(Set<UUID> ids) {

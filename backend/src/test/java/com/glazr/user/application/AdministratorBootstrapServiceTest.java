@@ -4,6 +4,7 @@ import com.glazr.accessprofile.infrastructure.AccessProfileRepository;
 import com.glazr.configuration.BootstrapCredentials;
 import com.glazr.permission.infrastructure.PermissionRepository;
 import com.glazr.user.infrastructure.UserRepository;
+import com.glazr.credential.infrastructure.PasswordCredentialRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -22,7 +23,7 @@ class AdministratorBootstrapServiceTest {
     private final AccessProfileRepository profiles = mock(AccessProfileRepository.class);
     private final AdministratorBootstrapService service = new AdministratorBootstrapService(
             users, profiles, mock(PermissionRepository.class),
-            mock(PasswordEncoder.class), Clock.systemUTC());
+            mock(PasswordEncoder.class), mock(PasswordCredentialRepository.class), Clock.systemUTC());
 
     @Test
     void failsSafelyWithNamesOfMissingVariablesWhenDatabaseIsEmpty() {

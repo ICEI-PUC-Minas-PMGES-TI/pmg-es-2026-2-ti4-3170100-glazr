@@ -11,6 +11,9 @@ import com.glazr.authentication.infrastructure.UserSessionService;
 import com.glazr.user.api.CreateUserRequest;
 import com.glazr.user.infrastructure.UserEntity;
 import com.glazr.user.infrastructure.UserRepository;
+import com.glazr.credential.infrastructure.ExternalIdentityRepository;
+import com.glazr.credential.infrastructure.PasswordCredentialEntity;
+import com.glazr.credential.infrastructure.PasswordCredentialRepository;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -29,13 +32,17 @@ class UserManagementServiceTest {
         UserRepository users = mock(UserRepository.class);
         AccessProfileRepository profiles = mock(AccessProfileRepository.class);
         PasswordEncoder encoder = mock(PasswordEncoder.class);
+        PasswordCredentialRepository credentials = mock(PasswordCredentialRepository.class);
+        ExternalIdentityRepository externalIdentities = mock(ExternalIdentityRepository.class);
         AccessProfileEntity profile = AccessProfileEntity.create("Operador", null, Set.of(), now);
         when(users.findByEmailIgnoreCase("operator@glazr.local")).thenReturn(Optional.empty());
         when(profiles.findAllById(Set.of(profile.getId()))).thenReturn(List.of(profile));
         when(encoder.encode("frase senha inicial")).thenReturn("hash-versionado");
         when(users.saveAndFlush(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(credentials.save(any(PasswordCredentialEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
         UserManagementService service = new UserManagementService(
-                users, profiles, encoder, mock(AdministratorGuard.class), mock(UserSessionService.class),
+                users, profiles, encoder, credentials, externalIdentities,
+                mock(AdministratorGuard.class), mock(UserSessionService.class),
                 Clock.fixed(now, ZoneOffset.UTC));
 
         var created = service.create(new CreateUserRequest(

@@ -2,10 +2,13 @@ package com.glazr.user.infrastructure;
 
 import com.glazr.accessprofile.infrastructure.AccessProfileEntity;
 import com.glazr.user.domain.EmailAddress;
+import com.glazr.user.domain.AccountType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -28,8 +31,9 @@ public class UserEntity {
     private String email;
     @Column(name = "display_name", nullable = false, length = 120)
     private String displayName;
-    @Column(name = "password_hash", nullable = false, length = 100)
-    private String passwordHash;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_type", nullable = false, length = 30)
+    private AccountType accountType;
     @Column(nullable = false)
     private boolean active;
     @Column(name = "failed_login_attempts", nullable = false)
@@ -54,15 +58,15 @@ public class UserEntity {
     protected UserEntity() {
     }
 
-    public static UserEntity create(String email, String displayName, String passwordHash,
-                                    Set<AccessProfileEntity> profiles, Instant now) {
+    public static UserEntity createEmployee(String email, String displayName,
+                                            Set<AccessProfileEntity> profiles, Instant now) {
         String normalizedDisplayName = normalizeDisplayName(displayName);
         if (profiles == null || profiles.isEmpty()) throw new IllegalArgumentException("Ao menos um perfil é obrigatório");
         UserEntity user = new UserEntity();
         user.id = UUID.randomUUID();
         user.email = EmailAddress.normalize(email);
         user.displayName = normalizedDisplayName;
-        user.passwordHash = passwordHash;
+        user.accountType = AccountType.EMPLOYEE;
         user.active = true;
         user.createdAt = now;
         user.updatedAt = now;
@@ -117,7 +121,7 @@ public class UserEntity {
     public UUID getId() { return id; }
     public String getEmail() { return email; }
     public String getDisplayName() { return displayName; }
-    public String getPasswordHash() { return passwordHash; }
+    public AccountType getAccountType() { return accountType; }
     public boolean isActive() { return active; }
     public int getFailedLoginAttempts() { return failedLoginAttempts; }
     public Instant getLockedUntil() { return lockedUntil; }

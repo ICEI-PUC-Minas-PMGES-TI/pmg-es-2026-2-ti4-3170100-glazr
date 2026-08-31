@@ -4,6 +4,10 @@ import com.glazr.authentication.application.AuthenticatedUser;
 import com.glazr.authentication.application.AuthenticatedUserFactory;
 import com.glazr.shared.api.SecurityProblemWriter;
 import com.glazr.user.infrastructure.UserRepository;
+import com.glazr.credential.domain.AuthenticationMethod;
+import com.glazr.credential.infrastructure.ExternalIdentityEntity;
+import com.glazr.credential.infrastructure.ExternalIdentityRepository;
+import com.glazr.credential.infrastructure.PasswordCredentialRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,10 +28,16 @@ public class ActiveUserSessionFilter extends OncePerRequestFilter {
 
     private final UserRepository users;
     private final SecurityProblemWriter problems;
+    private final PasswordCredentialRepository passwordCredentials;
+    private final ExternalIdentityRepository externalIdentities;
 
-    public ActiveUserSessionFilter(UserRepository users, SecurityProblemWriter problems) {
+    public ActiveUserSessionFilter(UserRepository users, SecurityProblemWriter problems,
+                                   PasswordCredentialRepository passwordCredentials,
+                                   ExternalIdentityRepository externalIdentities) {
         this.users = users;
         this.problems = problems;
+        this.passwordCredentials = passwordCredentials;
+        this.externalIdentities = externalIdentities;
     }
 
     @Override
@@ -44,7 +54,12 @@ public class ActiveUserSessionFilter extends OncePerRequestFilter {
                         "AUTHENTICATION_REQUIRED", "Autenticação necessária");
                 return;
             }
-            AuthenticatedUser refreshed = AuthenticatedUserFactory.from(user.get());
+            var methods = java.util.EnumSet.noneOf(AuthenticationMethod.class);
+            if (passwordCredentials.existsById(user.get().getId())) methods.add(AuthenticationMethod.PASSWORD);
+            if (externalIdentities.existsByUserIdAndProvider(user.get().getId(), ExternalIdentityEntity.GOOGLE)) {
+                methods.add(AuthenticationMethod.GOOGLE);
+            }
+            AuthenticatedUser refreshed = AuthenticatedUserFactory.from(user.get(), methods);
             GlazrUserPrincipal refreshedPrincipal = new GlazrUserPrincipal(refreshed);
             var authorities = refreshed.permissions().stream().map(SimpleGrantedAuthority::new).toList();
             UsernamePasswordAuthenticationToken replacement =

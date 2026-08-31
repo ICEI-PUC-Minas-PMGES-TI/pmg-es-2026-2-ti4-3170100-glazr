@@ -9,7 +9,9 @@ public record AuthenticatedUser(
         String email,
         String displayName,
         boolean active,
+        String accountType,
         List<String> profiles,
-        List<String> permissions
+        List<String> permissions,
+        List<String> authenticationMethods
 ) implements Serializable {
 }

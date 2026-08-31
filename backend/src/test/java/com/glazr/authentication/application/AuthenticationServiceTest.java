@@ -3,6 +3,9 @@ package com.glazr.authentication.application;
 import com.glazr.accessprofile.infrastructure.AccessProfileEntity;
 import com.glazr.user.infrastructure.UserEntity;
 import com.glazr.user.infrastructure.UserRepository;
+import com.glazr.credential.infrastructure.ExternalIdentityRepository;
+import com.glazr.credential.infrastructure.PasswordCredentialEntity;
+import com.glazr.credential.infrastructure.PasswordCredentialRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +27,8 @@ class AuthenticationServiceTest {
     private static final Instant NOW = Instant.parse("2026-08-30T12:00:00Z");
     private final UserRepository users = mock(UserRepository.class);
     private final PasswordEncoder encoder = mock(PasswordEncoder.class);
+    private final PasswordCredentialRepository credentials = mock(PasswordCredentialRepository.class);
+    private final ExternalIdentityRepository externalIdentities = mock(ExternalIdentityRepository.class);
     private final Clock clock = Clock.fixed(NOW, ZoneOffset.UTC);
     private AuthenticationService service;
     private UserEntity user;
@@ -32,10 +37,14 @@ class AuthenticationServiceTest {
     void setUp() {
         when(encoder.encode(anyString())).thenReturn("{bcrypt-sha256}$2a$12$sentinel");
         AccessProfileEntity profile = AccessProfileEntity.create("OPERADOR", null, Set.of(), NOW);
-        user = UserEntity.create("admin@glazr.local", "Admin", "hash", Set.of(profile), NOW);
-        service = new AuthenticationService(users, encoder, new AuthenticationTransaction(users, clock));
+        user = UserEntity.createEmployee("admin@glazr.local", "Admin", Set.of(profile), NOW);
+        PasswordCredentialEntity credential = PasswordCredentialEntity.create(user.getId(), "hash", NOW);
+        service = new AuthenticationService(users, credentials, encoder,
+                new AuthenticationTransaction(users, credentials, externalIdentities, clock));
         when(users.findByEmailIgnoreCase("admin@glazr.local")).thenReturn(Optional.of(user));
         when(users.findByIdForUpdate(user.getId())).thenReturn(Optional.of(user));
+        when(credentials.findById(user.getId())).thenReturn(Optional.of(credential));
+        when(credentials.findByUserIdForUpdate(user.getId())).thenReturn(Optional.of(credential));
     }
 
     @Test
@@ -69,7 +78,8 @@ class AuthenticationServiceTest {
         for (int attempt = 0; attempt < 5; attempt++) user.recordFailedLogin(NOW);
         when(encoder.matches(anyString(), anyString())).thenReturn(true);
         Clock afterExpiry = Clock.fixed(NOW.plusSeconds(16 * 60), ZoneOffset.UTC);
-        service = new AuthenticationService(users, encoder, new AuthenticationTransaction(users, afterExpiry));
+        service = new AuthenticationService(users, credentials, encoder,
+                new AuthenticationTransaction(users, credentials, externalIdentities, afterExpiry));
 
         service.authenticate("admin@glazr.local", "senha válida longa");
 

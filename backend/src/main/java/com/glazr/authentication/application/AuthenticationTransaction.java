@@ -2,6 +2,10 @@ package com.glazr.authentication.application;
 
 import com.glazr.user.infrastructure.UserEntity;
 import com.glazr.user.infrastructure.UserRepository;
+import com.glazr.credential.domain.AuthenticationMethod;
+import com.glazr.credential.infrastructure.ExternalIdentityEntity;
+import com.glazr.credential.infrastructure.ExternalIdentityRepository;
+import com.glazr.credential.infrastructure.PasswordCredentialRepository;
 import java.time.Clock;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -11,10 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthenticationTransaction {
 
     private final UserRepository users;
+    private final PasswordCredentialRepository credentials;
+    private final ExternalIdentityRepository externalIdentities;
     private final Clock clock;
 
-    public AuthenticationTransaction(UserRepository users, Clock clock) {
+    public AuthenticationTransaction(UserRepository users, PasswordCredentialRepository credentials,
+                                     ExternalIdentityRepository externalIdentities, Clock clock) {
         this.users = users;
+        this.credentials = credentials;
+        this.externalIdentities = externalIdentities;
         this.clock = clock;
     }
 
@@ -23,8 +32,10 @@ public class AuthenticationTransaction {
                                       String observedPasswordHash, boolean passwordMatches) {
         UserEntity user = users.findByIdForUpdate(observedUserId)
                 .orElseThrow(AuthenticationFailedException::new);
+        var credential = credentials.findByUserIdForUpdate(observedUserId)
+                .orElseThrow(AuthenticationFailedException::new);
         if (!user.getEmail().equals(observedEmail)
-                || !user.getPasswordHash().equals(observedPasswordHash)) {
+                || !credential.getPasswordHash().equals(observedPasswordHash)) {
             throw new AuthenticationFailedException();
         }
         var now = clock.instant();
@@ -36,6 +47,10 @@ public class AuthenticationTransaction {
         }
         user.recordSuccessfulLogin(now);
         users.save(user);
-        return AuthenticatedUserFactory.from(user);
+        var methods = java.util.EnumSet.of(AuthenticationMethod.PASSWORD);
+        if (externalIdentities.existsByUserIdAndProvider(user.getId(), ExternalIdentityEntity.GOOGLE)) {
+            methods.add(AuthenticationMethod.GOOGLE);
+        }
+        return AuthenticatedUserFactory.from(user, methods);
     }
 }
