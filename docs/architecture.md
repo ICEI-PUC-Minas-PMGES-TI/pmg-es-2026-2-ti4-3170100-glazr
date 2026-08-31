@@ -1,4 +1,4 @@
-# Arquitetura inicial do Glazr
+# Arquitetura do Glazr
 
 ## Visão geral
 
@@ -19,7 +19,7 @@ Spring Boot :8080 ----------------------+
                  PostgreSQL :5432
 ```
 
-Somente o Nginx é publicado normalmente no host. Ele serve a SPA e encaminha a API; backend e banco comunicam-se pela rede interna do Compose.
+Somente o Nginx é publicado normalmente no host. Ele serve a SPA e encaminha a API; backend e banco comunicam-se pela rede interna do Compose. Em desenvolvimento, o backend também envia convites e redefinições ao Mailpit pela rede interna. Em produção, o mesmo adapter usa SMTP externo configurado por segredo.
 
 ## Frontend
 
@@ -28,6 +28,9 @@ O cliente é dividido por responsabilidade:
 - `app`: providers, router e guards de rota;
 - `pages`: composição das telas de login e área inicial;
 - `features/auth`: contratos, API, estado em memória, hooks e componentes da autenticação;
+- `features/users`: administração de funcionários e convites;
+- `features/invitations`: captura segura do fragmento e ativação;
+- `features/account-security`: senha, reset e vínculo Google;
 - `shared`: cliente HTTP, Problem Details, componentes genéricos e design tokens.
 
 O cliente HTTP é a única fronteira para `fetch`, aplica `credentials: include`, interpreta JSON, `204` e `application/problem+json`. O módulo de autenticação obtém CSRF imediatamente antes de login e logout. O `AuthProvider` modela `loading`, `authenticated` e `unauthenticated`; a sessão é reconstruída por `/auth/me` e nunca armazenada no browser.
@@ -38,6 +41,10 @@ O cliente HTTP é a única fronteira para `fetch`, aplica `credentials: include`
 | --- | --- | --- |
 | `authentication` | Login, logout, usuário atual, bloqueio e principal autenticado | `user`, Spring Security/Session |
 | `user` | Ciclo administrativo do usuário, perfis associados e regra do último administrador | `accessprofile`, `shared` |
+| `invitation` | Convites temporários, ativação e entrega pós-commit | `user`, `credential`, `mail`, `shared` |
+| `credential` | Senhas locais, resets e identidades externas | `user`, `authentication`, `shared` |
+| `federatedidentity` | Claims Google, vínculo por `sub` e callback OIDC | `credential`, `user`, Spring OAuth2 Client |
+| `mail` | Porta de mensagens e adapter SMTP texto/HTML | Spring Mail |
 | `accessprofile` | CRUD controlado de perfis e proteção de `ADMINISTRADOR` | `permission`, `shared` |
 | `permission` | Catálogo fixo e consulta somente leitura | `shared` |
 | `configuration` | Security chain, cookies, CORS, relógio e propriedades | módulos funcionais |
@@ -51,6 +58,43 @@ Dentro de cada módulo:
 - `infrastructure`: JPA, adapters e integração com frameworks.
 
 Controllers nunca usam repositories diretamente. A API retorna records DTO, não entidades JPA.
+
+## Identidade e credenciais
+
+```text
+                         +-> user_password_credentials
+users (fonte de verdade) +-> user_external_identities (GOOGLE/sub)
+   |                     +-> employee_invitations
+   +------------------------> password_reset_requests
+```
+
+`users` mantém estado, tipo de conta, nome, e-mail e perfis. Credenciais são relações opcionais; um funcionário pode possuir senha, Google ou ambos. Todos os métodos constroem `GlazrUserPrincipal` a partir do mesmo usuário local e terminam em Spring Session JDBC. Perfis e permissions nunca são obtidos do Google.
+
+O fluxo local consulta a credencial de senha pelo UUID do usuário e preserva o bloqueio por tentativas. O fluxo Google procura primeiro `(provider, subject)`; um primeiro vínculo só é permitido quando já existe um `EMPLOYEE` com e-mail verificado idêntico. Constraints únicas impedem vínculos concorrentes ou cruzados.
+
+## Convites e tokens temporários
+
+Convites e resets usam tokens de 256 bits, entregues em fragmentos de URL e armazenados somente como SHA-256. O frontend remove o fragmento imediatamente e envia o token apenas no corpo de uma requisição HTTPS. Consumo, revogação e expiração são validados sob lock; a atualização da credencial e o consumo pertencem à mesma transação.
+
+```text
+admin cria funcionário
+  -> transação: user + invitation(PENDING)
+  -> after-commit: EmployeeMailSender
+       -> SMTP aceitou: SENT
+       -> falhou: FAILED, usuário preservado
+  -> funcionário ativa por senha ou Google
+       -> credencial vinculada ao mesmo user.id
+       -> invitation.consumed_at
+       -> sessão Glazr
+```
+
+Reenvio revoga o convite anterior e cria token novo. O envio externo ocorre fora da transação de negócio para não prender conexão nem desfazer a criação do usuário por indisponibilidade SMTP.
+
+## Google OIDC
+
+Spring Security OAuth2 Client controla authorization code, `state`, `nonce`, assinatura, issuer, audience e expiração. O mapper da aplicação exige `email_verified=true`, normaliza o e-mail e usa `sub` como chave permanente. O token do convite nunca é enviado ao Google: a sessão curta guarda somente o UUID interno do convite.
+
+Tokens do Google existem somente durante o callback; não são persistidos, enviados à SPA ou usados como sessão do Glazr. Após o vínculo, o backend cria o mesmo `SecurityContext` e cookie `GLAZR_SESSION` do login local. Com Google desabilitado, nenhum endpoint ou botão do provedor fica disponível.
 
 ## Fluxos críticos
 
@@ -97,6 +141,9 @@ Operações que desativam uma conta ou removem o perfil protegido bloqueiam pess
 - Formato versionado `{bcrypt-sha256}`: SHA-256/Base64 determinístico antes de BCrypt força 12 evita o limite de entrada de 72 bytes do BCrypt; senha entre 12 e 128 caracteres, sem regras artificiais nem normalização.
 - Session fixation mitigada por troca do ID no login.
 - Erros de login são indistinguíveis e seguros.
+- Tokens de convite/reset são hash-only, de uso único e nunca entram em logs.
+- Tokens OAuth não substituem a sessão local nem são persistidos.
+- Resets usam resposta genérica e invalidam sessões anteriores.
 - Permissões são authorities e verificadas por `@PreAuthorize`.
 - Apenas `/actuator/health` é exposto e seus detalhes não são públicos.
 
@@ -110,6 +157,8 @@ Aplicação e banco usam UTC. UUIDs são gerados pela aplicação antes do `pers
 
 O Dockerfile do backend compila pelo wrapper em JDK 21 e executa como usuário não root em JRE 21. O Dockerfile do Nginx usa Node 24.15 em uma etapa de build reproduzível com `npm ci`, copia somente o `dist` para a imagem final e configura fallback da SPA sem interferir em `/api/` ou `/health`. Compose fixa imagens, mantém o banco em volume nomeado e condiciona o backend à saúde do PostgreSQL. Nginx limita corpo, configura timeouts, oculta sua versão e preserva headers do proxy.
 
+O Compose de desenvolvimento adiciona Mailpit com versão fixa, SMTP interno e interface web local. Produção não depende de Mailpit e recebe configuração SMTP/Google exclusivamente por variáveis e secrets.
+
 Os profiles Spring separam defaults locais, teste controlado e produção segura. Nenhum profile de produção possui senha padrão. `.env.example` contém apenas valores ilustrativos e é proibido versionar `.env`.
 
 ## Decisões deliberadas
@@ -119,3 +168,5 @@ Os profiles Spring separam defaults locais, teste controlado e produção segura
 - O catálogo e o perfil protegido são dados de sistema versionados por migration; a senha inicial nunca entra em migration.
 - O update de perfil usa `PUT`, pois substitui seu estado administrativo e o conjunto de permissões de forma explícita.
 - Não há abstrações para multiempresa, mensageria, estado global genérico ou biblioteca visual enquanto não existir requisito.
+- Conta local é a identidade; métodos de autenticação são credenciais substituíveis e nunca originam permissões.
+- Clientes, orçamento e marketing permanecem módulos futuros sem schema ou telas antecipadas nesta fase.
