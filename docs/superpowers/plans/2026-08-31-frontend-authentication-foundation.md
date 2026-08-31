@@ -16,7 +16,7 @@
 - Use somente URLs relativas sob `/api/v1` e `credentials: "include"`.
 - Não use JWT, localStorage, sessionStorage, credenciais de exemplo reais ou bibliotecas visuais pesadas.
 - Use a paleta `#1E3A5F`, `#2F557F`, `#7FA6C9`, `#EAF2F8`, `#FFFFFF` e `#172A3A` como tokens CSS.
-- A suíte terá somente quatro testes comportamentais de alto valor.
+- A suíte terá somente cinco testes comportamentais de alto valor.
 - O backend Java não será alterado salvo incompatibilidade comprovada.
 
 ---
@@ -56,13 +56,13 @@
 - Create: `frontend/src/features/auth/model/auth-context.ts`
 - Create: `frontend/src/features/auth/model/AuthProvider.tsx`
 - Create: `frontend/src/features/auth/hooks/use-auth.ts`
-- Create: `frontend/src/features/auth/model/AuthProvider.test.tsx`
+- Test: `frontend/src/app/authentication-flow.test.tsx`
 
 **Interfaces:**
 - Consumes: `requestJson<T>` e `ApiError`.
 - Produces: `getCurrentUser()`, `login(credentials)`, `logout()`, `AuthProvider` e `useAuth()` com `status`, `user`, `login`, `logout` e estado de operação.
 
-- [ ] Escrever teste de restauração que responde `/me` com usuário completo e exige estado autenticado após o loading; executar para confirmar RED.
+- [ ] Escrever o cenário de restauração que responde `/me` com usuário completo e exige estado autenticado após o loading; executar para confirmar RED.
 - [ ] Definir contratos exatos de `CsrfResponse`, `LoginCredentials`, `AuthenticatedUser` e `ProblemDetail`.
 - [ ] Implementar chamadas de CSRF, login, `/me` e logout, obtendo CSRF antes de cada POST.
 - [ ] Implementar provider com inicialização única, estados explícitos e limpeza da sessão em `401`.
