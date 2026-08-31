@@ -1,13 +1,14 @@
 # Glazr
 
-O Glazr é o sistema interno de uma única vidraçaria. A fundação atual inclui uma SPA responsiva para autenticação, backend com sessões persistidas, usuários, perfis configuráveis, permissões predefinidas, PostgreSQL, Nginx e testes. Não há cadastro público.
+O Glazr é o sistema interno de uma única vidraçaria. A fundação atual inclui uma SPA responsiva, administração de funcionários, convites por e-mail, senha local e Google OIDC convergindo para o mesmo usuário, sessões persistidas, perfis configuráveis, PostgreSQL, Nginx e testes. Não há cadastro público.
 
 ## Tecnologias
 
 - Java 21 e Spring Boot 3.5.16;
 - Maven 3.9.11 por Maven Wrapper 3.3.2;
 - PostgreSQL 17.11 e Flyway;
-- Spring Security, Spring Session JDBC e SHA-256/Base64 + BCrypt força 12 com formato versionado;
+- Spring Security, OAuth2 Client/OIDC, Spring Session JDBC e SHA-256/Base64 + BCrypt força 12;
+- Spring Mail e Mailpit 1.30.6 para e-mail local;
 - React 19, TypeScript strict, Vite 8 e React Router;
 - Vitest, Testing Library e MSW para uma suíte frontend enxuta;
 - Testcontainers 1.21.4, gerenciado pelo Spring Boot;
@@ -20,7 +21,12 @@ O build não precisa de Maven, PostgreSQL ou Nginx instalados no host. Para exec
 ```text
 backend/                 aplicação Spring Boot, wrapper, migrations e testes
   src/main/java/com/glazr/
-    authentication/      login, principal e revalidação de sessão
+    authentication/      login local, principal e revalidação de sessão
+    credential/          credenciais locais, identidades externas e tokens
+    invitation/          convite, ativação e entrega pós-commit
+    password/            alteração e redefinição de senha
+    google/              vínculo e callback OpenID Connect
+    mail/                porta de aplicação e adapter SMTP
     user/                usuários e proteção do último administrador
     accessprofile/       perfis configuráveis e perfil protegido
     permission/          catálogo somente leitura
@@ -30,12 +36,12 @@ frontend/                SPA React/TypeScript
   src/
     app/                 composição, rotas e guards
     pages/               telas associadas às rotas
-    features/auth/       API, estado, hooks e componentes de autenticação
+    features/            autenticação, convite, senha e administração
     shared/              cliente HTTP, componentes e estilos
 docs/                    spec, arquitetura e plano de implementação
 infra/nginx/             build da SPA, arquivos estáticos e proxy reverso
 scripts/smoke-test.ps1   verificação ponta a ponta
-compose.yaml             PostgreSQL, backend e Nginx
+compose.yaml             PostgreSQL, Mailpit, backend e Nginx para desenvolvimento
 ```
 
 ## Preparar o ambiente
@@ -59,7 +65,7 @@ docker compose --env-file .env up -d --wait
 docker compose ps
 ```
 
-A aplicação fica disponível em `http://localhost:8080` por padrão e a API em `http://localhost:8080/api/v1`. O Nginx serve a SPA e encaminha `/api/` para o backend pela mesma origem. A rota `http://localhost:8080/health` verifica o Nginx; o backend expõe somente `/actuator/health` dentro da rede. PostgreSQL não publica porta no host.
+A aplicação fica disponível em `http://localhost:8080`, a API em `http://localhost:8080/api/v1` e o Mailpit local em `http://localhost:8025`. O Nginx serve a SPA e encaminha `/api/`, `/oauth2/` e `/login/oauth2/` ao backend pela mesma origem. A rota `http://localhost:8080/health` verifica o Nginx; backend e PostgreSQL não publicam portas no host.
 
 Logs e parada sem apagar dados:
 
@@ -73,9 +79,9 @@ docker compose down
 
 ## Frontend e autenticação
 
-A SPA possui `/login` e a rota protegida `/`. Ao abrir a aplicação, ela consulta `/api/v1/auth/me` para restaurar uma sessão válida sem armazenar dados de autenticação no navegador. Login e logout obtêm um CSRF novo antes de cada `POST`; todas as chamadas usam cookies de mesma origem com `credentials: include`.
+A SPA possui `/login`, `/activate`, `/forgot-password`, `/reset-password`, `/account/security`, `/admin/users` e `/admin/users/new`. Ao abrir a aplicação, ela consulta `/api/v1/auth/me` para restaurar a sessão sem armazenar autenticação no navegador. Todas as mutações obtêm um CSRF novo e usam cookies de mesma origem com `credentials: include`.
 
-O cookie `GLAZR_SESSION` é HttpOnly e nunca é lido pelo frontend. Senhas e tokens CSRF não são persistidos em `localStorage` ou `sessionStorage`. Respostas `401` removem o estado autenticado local e enviam o usuário ao login.
+O cookie `GLAZR_SESSION` é HttpOnly e nunca é lido pelo frontend. Senhas, tokens CSRF, convites e resets não são persistidos em `localStorage` ou `sessionStorage`. Tokens temporários chegam no fragmento, são copiados somente para memória e removidos imediatamente da barra de endereço.
 
 Para desenvolver a interface com hot reload, mantenha a stack Docker ativa para atender a API e execute:
 
@@ -96,6 +102,24 @@ O processo é idempotente: quando existe algum usuário, as variáveis são igno
 ```powershell
 docker compose --env-file .env up -d --force-recreate backend
 ```
+
+## Convites, SMTP e Mailpit
+
+O administrador cria o funcionário sem senha em `/admin/users/new`. A operação persiste usuário e convite na mesma transação; o envio ocorre depois do commit. Falha SMTP não apaga o usuário e aparece como `FAILED`, permitindo reenvio com um token novo. Em desenvolvimento, abra o Mailpit em `http://localhost:8025`, leia a mensagem e use o link de ativação.
+
+`GLAZR_PUBLIC_BASE_URL` deve conter somente a origem pública, sem caminho, query ou fragmento. Em produção configure SMTP externo pelas variáveis `SMTP_*`; o Compose deste repositório é a composição local de desenvolvimento e inclui Mailpit deliberadamente.
+
+## Google OpenID Connect
+
+Google fica desligado com `GLAZR_GOOGLE_AUTH_ENABLED=false`; nesse estado a aplicação inicia sem credenciais e oculta os botões. Para habilitar:
+
+1. crie um projeto na Google Auth Platform e configure a tela de consentimento;
+2. crie um cliente OAuth do tipo aplicação web;
+3. registre exatamente `http://localhost:8080/login/oauth2/code/google` como redirect URI local;
+4. defina `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GLAZR_GOOGLE_AUTH_ENABLED=true` fora do Git;
+5. recrie o backend.
+
+São solicitados somente `openid`, `email` e `profile`. O Google deve retornar `email_verified=true`, e o e-mail precisa ser idêntico ao funcionário previamente cadastrado. O backend armazena apenas `provider` e `sub`; access token e refresh token não são persistidos nem enviados à SPA. Em produção use a origem HTTPS correspondente no redirect URI. Organizações Google Workspace podem exigir aprovação administrativa para aplicativos externos.
 
 ## CSRF, login, chamada autenticada e logout
 
@@ -152,7 +176,7 @@ npm run test:run
 npm run build
 ```
 
-A suíte frontend possui cinco testes comportamentais focados no contrato HTTP, login, falha segura, proteção de rota, restauração de sessão e logout. Não há meta artificial de cobertura.
+A suíte frontend é propositalmente enxuta e cobre contrato HTTP, login, falha segura, proteção de rota, sessão, logout e remoção imediata do token de convite. Não há meta artificial de cobertura.
 
 Backend:
 
@@ -176,8 +200,11 @@ Remove-Item Env:GLAZR_BOOTSTRAP_ADMIN_PASSWORD
 
 ## Contrato principal
 
-- autenticação: `GET /api/v1/auth/csrf`, `POST /login`, `GET /me`, `POST /logout`;
-- usuários: `POST/GET /api/v1/users`, `GET/PATCH /users/{id}`, `PATCH /users/{id}/status`;
+- autenticação: `GET /api/v1/auth/csrf`, `GET /auth/config`, `POST /auth/login`, `GET /auth/me`, `POST /auth/logout`;
+- convite: `POST /api/v1/invitations/inspect`, `/accept-with-password` e `/google/start`;
+- senha: `POST /api/v1/auth/password/change`, `/password-reset/request` e `/password-reset/complete`;
+- Google: `POST /api/v1/auth/google/start`, `/auth/google/link/start` e endpoints internos OAuth2;
+- usuários: `POST/GET /api/v1/users`, `GET/PATCH /users/{id}`, `PATCH /users/{id}/status` e convite em `/users/{id}/invitation/*`;
 - perfis: `POST/GET /api/v1/access-profiles`, `GET/PUT/DELETE /access-profiles/{id}`;
 - permissões: `GET /api/v1/permissions`.
 
@@ -185,4 +212,4 @@ Erros usam `application/problem+json` com `code` estável e sem stack trace ou c
 
 ## Limitações desta etapa
 
-O frontend desta etapa cobre somente autenticação e uma área inicial do usuário. Não existem cadastro público, confirmação de e-mail, recuperação/redefinição/alteração de senha, OAuth/SSO/MFA, JWT, multiempresa, e-mail, exclusão física de usuário, telas administrativas ou módulos comerciais.
+Não existem cadastro público, MFA, JWT, multiempresa, exclusão física de usuário, identidade de clientes ou módulos comerciais. A validação automatizada do Google termina na fronteira de claims/vínculo e não usa rede externa; o teste final com credenciais reais deve ser feito manualmente no projeto Google configurado para o ambiente.

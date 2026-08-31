@@ -29,8 +29,8 @@ O cliente é dividido por responsabilidade:
 - `pages`: composição das telas de login e área inicial;
 - `features/auth`: contratos, API, estado em memória, hooks e componentes da autenticação;
 - `features/users`: administração de funcionários e convites;
-- `features/invitations`: captura segura do fragmento e ativação;
-- `features/account-security`: senha, reset e vínculo Google;
+- `features/invitation`: captura segura do fragmento e ativação;
+- `features/password`: alteração e redefinição de senha;
 - `shared`: cliente HTTP, Problem Details, componentes genéricos e design tokens.
 
 O cliente HTTP é a única fronteira para `fetch`, aplica `credentials: include`, interpreta JSON, `204` e `application/problem+json`. O módulo de autenticação obtém CSRF imediatamente antes de login e logout. O `AuthProvider` modela `loading`, `authenticated` e `unauthenticated`; a sessão é reconstruída por `/auth/me` e nunca armazenada no browser.
@@ -43,7 +43,8 @@ O cliente HTTP é a única fronteira para `fetch`, aplica `credentials: include`
 | `user` | Ciclo administrativo do usuário, perfis associados e regra do último administrador | `accessprofile`, `shared` |
 | `invitation` | Convites temporários, ativação e entrega pós-commit | `user`, `credential`, `mail`, `shared` |
 | `credential` | Senhas locais, resets e identidades externas | `user`, `authentication`, `shared` |
-| `federatedidentity` | Claims Google, vínculo por `sub` e callback OIDC | `credential`, `user`, Spring OAuth2 Client |
+| `google` | Claims Google, vínculo por `sub` e callback OIDC | `credential`, `user`, Spring OAuth2 Client |
+| `password` | Alteração e redefinição de senha | `credential`, `user`, `mail` |
 | `mail` | Porta de mensagens e adapter SMTP texto/HTML | Spring Mail |
 | `accessprofile` | CRUD controlado de perfis e proteção de `ADMINISTRADOR` | `permission`, `shared` |
 | `permission` | Catálogo fixo e consulta somente leitura | `shared` |
@@ -155,7 +156,7 @@ Aplicação e banco usam UTC. UUIDs são gerados pela aplicação antes do `pers
 
 ## Operação
 
-O Dockerfile do backend compila pelo wrapper em JDK 21 e executa como usuário não root em JRE 21. O Dockerfile do Nginx usa Node 24.15 em uma etapa de build reproduzível com `npm ci`, copia somente o `dist` para a imagem final e configura fallback da SPA sem interferir em `/api/` ou `/health`. Compose fixa imagens, mantém o banco em volume nomeado e condiciona o backend à saúde do PostgreSQL. Nginx limita corpo, configura timeouts, oculta sua versão e preserva headers do proxy.
+O Dockerfile do backend compila pelo wrapper em JDK 21 e executa como usuário não root em JRE 21. O Dockerfile do Nginx usa Node 24.15 em uma etapa de build reproduzível com `npm ci`, copia somente o `dist` para a imagem final e configura fallback da SPA sem interferir em `/api/`, `/oauth2/`, `/login/oauth2/` ou `/health`. Compose fixa imagens, mantém o banco em volume nomeado e condiciona o backend à saúde do PostgreSQL. Nginx limita corpo, configura timeouts, oculta sua versão e preserva headers do proxy.
 
 O Compose de desenvolvimento adiciona Mailpit com versão fixa, SMTP interno e interface web local. Produção não depende de Mailpit e recebe configuração SMTP/Google exclusivamente por variáveis e secrets.
 

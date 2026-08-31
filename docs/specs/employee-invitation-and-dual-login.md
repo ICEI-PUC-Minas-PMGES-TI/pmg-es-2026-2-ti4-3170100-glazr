@@ -60,7 +60,7 @@ O banco impõe unicidade em `(provider, subject)` e `(user_id, provider)`. A apl
 employee_invitations
   id UUID PK
   user_id UUID NOT NULL FK users
-  token_hash CHAR(64) NOT NULL UNIQUE
+  token_hash VARCHAR(64) NOT NULL UNIQUE
   expires_at TIMESTAMPTZ NOT NULL
   consumed_at TIMESTAMPTZ
   revoked_at TIMESTAMPTZ
@@ -79,7 +79,7 @@ employee_invitations
 password_reset_requests
   id UUID PK
   user_id UUID NOT NULL FK users
-  token_hash CHAR(64) NOT NULL UNIQUE
+  token_hash VARCHAR(64) NOT NULL UNIQUE
   expires_at TIMESTAMPTZ NOT NULL
   consumed_at TIMESTAMPTZ
   revoked_at TIMESTAMPTZ
