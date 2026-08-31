@@ -9,21 +9,26 @@ import com.glazr.user.api.CreateUserRequest;
 import com.glazr.user.api.UpdateUserRequest;
 import com.glazr.user.api.UserResponse;
 import com.glazr.user.domain.EmailAddress;
-import com.glazr.user.domain.PasswordPolicy;
 import com.glazr.user.infrastructure.UserEntity;
 import com.glazr.user.infrastructure.UserRepository;
-import com.glazr.credential.infrastructure.PasswordCredentialEntity;
 import com.glazr.credential.infrastructure.PasswordCredentialRepository;
 import com.glazr.credential.infrastructure.ExternalIdentityEntity;
 import com.glazr.credential.infrastructure.ExternalIdentityRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.glazr.credential.application.TemporaryTokenService;
+import com.glazr.invitation.application.InvitationDeliveryRequested;
+import com.glazr.invitation.infrastructure.EmployeeInvitationEntity;
+import com.glazr.invitation.infrastructure.EmployeeInvitationRepository;
+import com.glazr.mail.application.EmployeeInvitationMessage;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -33,42 +38,54 @@ public class UserManagementService {
 
     private final UserRepository users;
     private final AccessProfileRepository profiles;
-    private final PasswordEncoder passwordEncoder;
     private final PasswordCredentialRepository passwordCredentials;
     private final ExternalIdentityRepository externalIdentities;
+    private final EmployeeInvitationRepository invitations;
+    private final TemporaryTokenService tokens;
+    private final ApplicationEventPublisher events;
     private final AdministratorGuard administratorGuard;
     private final UserSessionService sessions;
     private final Clock clock;
+    private final Duration invitationTtl;
 
     public UserManagementService(UserRepository users, AccessProfileRepository profiles,
-                                 PasswordEncoder passwordEncoder, PasswordCredentialRepository passwordCredentials,
-                                 ExternalIdentityRepository externalIdentities, AdministratorGuard administratorGuard,
-                                 UserSessionService sessions, Clock clock) {
+                                 PasswordCredentialRepository passwordCredentials,
+                                 ExternalIdentityRepository externalIdentities,
+                                 EmployeeInvitationRepository invitations, TemporaryTokenService tokens,
+                                 ApplicationEventPublisher events, AdministratorGuard administratorGuard,
+                                 UserSessionService sessions, Clock clock,
+                                 @Value("${glazr.invitation-ttl:48h}") Duration invitationTtl) {
         this.users = users;
         this.profiles = profiles;
-        this.passwordEncoder = passwordEncoder;
         this.passwordCredentials = passwordCredentials;
         this.externalIdentities = externalIdentities;
+        this.invitations = invitations;
+        this.tokens = tokens;
+        this.events = events;
         this.administratorGuard = administratorGuard;
         this.sessions = sessions;
         this.clock = clock;
+        this.invitationTtl = invitationTtl;
     }
 
     @PreAuthorize("hasAuthority('USER_CREATE') and hasAuthority('ACCESS_PROFILE_ASSIGN')")
     @Transactional
-    public UserResponse create(CreateUserRequest request) {
+    public UserResponse create(CreateUserRequest request, UUID createdByUserId) {
         String email = EmailAddress.normalize(request.email());
         if (users.findByEmailIgnoreCase(email).isPresent()) {
             throw new ConflictException("DUPLICATE_EMAIL", "Já existe um usuário com este e-mail");
         }
-        PasswordPolicy.validate(request.password());
         Set<AccessProfileEntity> resolvedProfiles = resolveProfiles(request.accessProfileIds());
         var now = clock.instant();
         UserEntity user = UserEntity.createEmployee(email, request.displayName(), resolvedProfiles, now);
         users.saveAndFlush(user);
-        passwordCredentials.save(PasswordCredentialEntity.create(
-                user.getId(), passwordEncoder.encode(request.password()), now));
-        return toResponse(user);
+        var token = tokens.generate();
+        EmployeeInvitationEntity invitation = invitations.save(EmployeeInvitationEntity.create(
+                user.getId(), createdByUserId, token.hash(), now.plus(invitationTtl), now));
+        events.publishEvent(new InvitationDeliveryRequested(invitation.getId(),
+                new EmployeeInvitationMessage(user.getEmail(), user.getDisplayName(), token.rawValue(),
+                        invitation.getExpiresAt())));
+        return toResponse(user, invitation);
     }
 
     @PreAuthorize("hasAuthority('USER_READ')")
@@ -119,12 +136,19 @@ public class UserManagementService {
     }
 
     private UserResponse toResponse(UserEntity user) {
+        return toResponse(user, invitations.findFirstByUserIdOrderByCreatedAtDesc(user.getId()).orElse(null));
+    }
+
+    private UserResponse toResponse(UserEntity user, EmployeeInvitationEntity invitation) {
         java.util.List<String> methods = new java.util.ArrayList<>();
         if (passwordCredentials.existsById(user.getId())) methods.add("PASSWORD");
         if (externalIdentities.existsByUserIdAndProvider(user.getId(), ExternalIdentityEntity.GOOGLE)) {
             methods.add("GOOGLE");
         }
-        return UserResponse.from(user, methods);
+        return UserResponse.from(user, methods,
+                invitation == null ? null : invitation.statusAt(clock.instant()).name(),
+                invitation == null ? null : invitation.getExpiresAt(),
+                invitation == null ? null : invitation.getDeliveryStatus().name());
     }
 
     private Set<AccessProfileEntity> resolveProfiles(Set<UUID> ids) {

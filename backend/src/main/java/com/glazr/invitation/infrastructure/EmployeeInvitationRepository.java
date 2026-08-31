@@ -23,4 +23,5 @@ public interface EmployeeInvitationRepository extends JpaRepository<EmployeeInvi
     Optional<EmployeeInvitationEntity> findUsableByUserIdForUpdate(@Param("userId") UUID userId);
 
     Optional<EmployeeInvitationEntity> findFirstByUserIdOrderByCreatedAtDesc(UUID userId);
+    Optional<EmployeeInvitationEntity> findByTokenHash(String tokenHash);
 }
