@@ -20,7 +20,7 @@ CREATE INDEX ix_user_external_identities_user ON user_external_identities (user_
 CREATE TABLE employee_invitations (
     id UUID NOT NULL,
     user_id UUID NOT NULL,
-    token_hash CHAR(64) NOT NULL,
+    token_hash VARCHAR(64) NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL,
     consumed_at TIMESTAMPTZ,
     revoked_at TIMESTAMPTZ,
@@ -50,7 +50,7 @@ CREATE INDEX ix_employee_invitations_user_created
 CREATE TABLE password_reset_requests (
     id UUID NOT NULL,
     user_id UUID NOT NULL,
-    token_hash CHAR(64) NOT NULL,
+    token_hash VARCHAR(64) NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL,
     consumed_at TIMESTAMPTZ,
     revoked_at TIMESTAMPTZ,
@@ -70,4 +70,3 @@ CREATE UNIQUE INDEX uk_password_reset_requests_one_usable_per_user
     WHERE consumed_at IS NULL AND revoked_at IS NULL;
 CREATE INDEX ix_password_reset_requests_user_created
     ON password_reset_requests (user_id, created_at DESC);
-

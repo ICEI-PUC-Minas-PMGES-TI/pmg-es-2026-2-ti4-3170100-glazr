@@ -8,6 +8,8 @@ import com.glazr.authentication.application.AuthenticationService;
 import com.glazr.user.application.AdministratorBootstrapService;
 import com.glazr.user.application.LastActiveAdministratorException;
 import com.glazr.user.application.UserManagementService;
+import com.glazr.mail.application.EmployeeInvitationMessage;
+import com.glazr.mail.application.EmployeeMailSender;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -44,6 +47,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.verify;
+import org.mockito.ArgumentCaptor;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -77,6 +82,7 @@ class BackendIntegrationTest {
     @Autowired AuthenticationService authentication;
     @Autowired UserManagementService userManagement;
     @Autowired PasswordEncoder passwordEncoder;
+    @MockitoBean EmployeeMailSender mailSender;
 
     @BeforeEach
     void resetAdministratorLoginState() {
@@ -291,14 +297,24 @@ class BackendIntegrationTest {
                         .cookie(adminSession).with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"email":"%s","displayName":"Operador","password":"%s",
+                                {"email":"%s","displayName":"Operador",
                                  "accessProfileIds":["%s"]}
-                                """.formatted(operatorEmail, operatorPassword, profile.get("id").asText())))
+                                """.formatted(operatorEmail, profile.get("id").asText())))
                 .andExpect(status().isCreated())
                 .andReturn();
         JsonNode operator = objectMapper.readTree(userResult.getResponse().getContentAsByteArray());
 
-        Cookie operatorSession = login(operatorEmail, operatorPassword);
+        ArgumentCaptor<EmployeeInvitationMessage> invitationMessage =
+                ArgumentCaptor.forClass(EmployeeInvitationMessage.class);
+        verify(mailSender).sendInvitation(invitationMessage.capture());
+        MvcResult activation = mvc.perform(post("/api/v1/invitations/accept-with-password").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"token":"%s","password":"%s"}
+                                """.formatted(invitationMessage.getValue().rawToken(), operatorPassword)))
+                .andExpect(status().isOk()).andReturn();
+        Cookie operatorSession = activation.getResponse().getCookie("GLAZR_SESSION");
+        assertThat(operatorSession).isNotNull();
         mvc.perform(get("/api/v1/permissions").cookie(operatorSession))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
