@@ -4,9 +4,12 @@ import com.glazr.mail.application.EmployeeMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class PasswordResetDeliveryListener {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PasswordResetDeliveryListener.class);
     private final EmployeeMailSender mailSender;
 
     public PasswordResetDeliveryListener(EmployeeMailSender mailSender) { this.mailSender = mailSender; }
@@ -16,7 +19,7 @@ public class PasswordResetDeliveryListener {
         try {
             mailSender.sendPasswordReset(event.message());
         } catch (RuntimeException ignored) {
-            // A resposta permanece genérica; uma nova solicitação poderá ser feita.
+            LOGGER.warn("PASSWORD_RESET_DELIVERY_FAILED");
         }
     }
 }

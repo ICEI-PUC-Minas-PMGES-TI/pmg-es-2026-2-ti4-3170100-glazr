@@ -4,9 +4,12 @@ import com.glazr.mail.application.EmployeeMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class InvitationDeliveryListener {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InvitationDeliveryListener.class);
     private final EmployeeMailSender mailSender;
     private final InvitationDeliveryStatusService statuses;
 
@@ -22,6 +25,7 @@ public class InvitationDeliveryListener {
             statuses.markSent(event.invitationId());
         } catch (RuntimeException exception) {
             statuses.markFailed(event.invitationId());
+            LOGGER.warn("INVITATION_DELIVERY_FAILED invitationId={}", event.invitationId());
         }
     }
 }

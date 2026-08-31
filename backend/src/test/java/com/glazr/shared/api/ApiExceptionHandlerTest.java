@@ -13,8 +13,24 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.junit.jupiter.api.Test;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.http.HttpMethod;
 
 class ApiExceptionHandlerTest {
+
+    @Test
+    void unknownPublicPathUsesNotFoundInsteadOfInternalError() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getRequestURI()).thenReturn("/oauth2/authorization/google");
+        ApiExceptionHandler handler = new ApiExceptionHandler(Clock.fixed(Instant.EPOCH, ZoneOffset.UTC));
+
+        var problem = handler.resourceNotFound(
+                new NoResourceFoundException(HttpMethod.GET, "/oauth2/authorization/google"), request);
+
+        assertThat(problem.getStatus()).isEqualTo(404);
+        assertThat(problem.getProperties()).containsEntry("code", "RESOURCE_NOT_FOUND");
+    }
 
     @ParameterizedTest
     @CsvSource({

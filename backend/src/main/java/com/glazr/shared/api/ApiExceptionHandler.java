@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Clock;
 import java.util.List;
@@ -98,6 +99,11 @@ public class ApiExceptionHandler {
         LOGGER.error("Erro interno ao processar {} {}", request.getMethod(), request.getRequestURI(), exception);
         return problem(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
                 "Não foi possível processar a solicitação", request);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    ProblemDetail resourceNotFound(NoResourceFoundException exception, HttpServletRequest request) {
+        return problem(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", "Recurso não encontrado", request);
     }
 
     private ProblemDetail problem(HttpStatus status, String code, String detail, HttpServletRequest request) {
