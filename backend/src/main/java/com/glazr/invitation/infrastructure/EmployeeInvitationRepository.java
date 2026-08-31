@@ -24,4 +24,8 @@ public interface EmployeeInvitationRepository extends JpaRepository<EmployeeInvi
 
     Optional<EmployeeInvitationEntity> findFirstByUserIdOrderByCreatedAtDesc(UUID userId);
     Optional<EmployeeInvitationEntity> findByTokenHash(String tokenHash);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select invitation from EmployeeInvitationEntity invitation where invitation.id = :id")
+    Optional<EmployeeInvitationEntity> findByIdForUpdate(@Param("id") UUID id);
 }

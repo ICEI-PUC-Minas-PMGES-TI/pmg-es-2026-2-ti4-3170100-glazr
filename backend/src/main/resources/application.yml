@@ -51,6 +51,7 @@ glazr:
   public-base-url: ${GLAZR_PUBLIC_BASE_URL:http://localhost:8080}
   invitation-ttl: ${GLAZR_INVITATION_TTL:48h}
   password-reset-ttl: ${GLAZR_PASSWORD_RESET_TTL:30m}
+  google-auth-enabled: ${GLAZR_GOOGLE_AUTH_ENABLED:false}
   allowed-origins: ${GLAZR_ALLOWED_ORIGINS:}
   cookie:
     secure: ${GLAZR_COOKIE_SECURE:false}

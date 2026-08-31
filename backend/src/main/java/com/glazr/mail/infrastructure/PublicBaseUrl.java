@@ -24,6 +24,7 @@ public final class PublicBaseUrl {
 
     public String invitationLink(String rawToken) { return link("/activate", rawToken); }
     public String passwordResetLink(String rawToken) { return link("/reset-password", rawToken); }
+    public String origin() { return origin; }
 
     private String link(String path, String token) {
         if (token == null || !token.matches("[A-Za-z0-9_-]+")) throw new IllegalArgumentException("Token inválido");

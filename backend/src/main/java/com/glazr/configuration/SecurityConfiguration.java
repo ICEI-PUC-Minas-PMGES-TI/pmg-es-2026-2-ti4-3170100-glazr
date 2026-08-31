@@ -2,6 +2,8 @@ package com.glazr.configuration;
 
 import com.glazr.authentication.infrastructure.ActiveUserSessionFilter;
 import com.glazr.shared.api.SecurityProblemWriter;
+import com.glazr.google.infrastructure.GoogleAuthenticationFailureHandler;
+import com.glazr.google.infrastructure.GoogleAuthenticationSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -74,8 +76,11 @@ public class SecurityConfiguration {
     SecurityFilterChain securityFilterChain(HttpSecurity http, ActiveUserSessionFilter activeUserFilter,
                                             SecurityContextRepository contextRepository,
                                             SecurityProblemWriter problems,
+                                            GoogleAuthenticationSuccessHandler googleSuccess,
+                                            GoogleAuthenticationFailureHandler googleFailure,
                                             @Qualifier("corsConfigurationSource") CorsConfigurationSource corsSource,
-                                            @Value("${glazr.cookie.secure:false}") boolean secure) throws Exception {
+                                            @Value("${glazr.cookie.secure:false}") boolean secure,
+                                            @Value("${glazr.google-auth-enabled:false}") boolean googleEnabled) throws Exception {
         CookieCsrfTokenRepository csrfRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
         csrfRepository.setCookiePath("/");
         csrfRepository.setCookieCustomizer(cookie -> cookie.sameSite("Lax").secure(secure));
@@ -90,10 +95,12 @@ public class SecurityConfiguration {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf", "/actuator/health").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf", "/api/v1/auth/config",
+                                "/actuator/health", "/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/google/start").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/invitations/inspect",
                                 "/api/v1/invitations/accept-with-password",
+                                "/api/v1/invitations/google/start",
                                 "/api/v1/auth/password-reset/request",
                                 "/api/v1/auth/password-reset/complete").permitAll()
                         .anyRequest().authenticated())
@@ -115,6 +122,9 @@ public class SecurityConfiguration {
                         .logoutSuccessHandler((request, response, authentication) ->
                                 response.setStatus(HttpServletResponse.SC_NO_CONTENT)))
                 .addFilterBefore(activeUserFilter, AuthorizationFilter.class);
+        if (googleEnabled) {
+            http.oauth2Login(oauth -> oauth.successHandler(googleSuccess).failureHandler(googleFailure));
+        }
         return http.build();
     }
 }

@@ -112,6 +112,17 @@ public class InvitationService {
                 invitation.getExpiresAt(), List.copyOf(methods));
     }
 
+    @Transactional(readOnly = true)
+    public UUID prepareGoogle(String rawToken) {
+        if (!googleEnabled) throw new InvitationException(HttpStatus.NOT_FOUND, "GOOGLE_AUTH_DISABLED",
+                "Autenticação Google não está habilitada");
+        EmployeeInvitationEntity invitation = invitations.findByTokenHash(tokens.hash(rawToken))
+                .orElseThrow(this::invalid);
+        validateUsable(invitation);
+        requireEligibleUser(invitation.getUserId());
+        return invitation.getId();
+    }
+
     @Transactional
     public AuthenticatedUser acceptWithPassword(String rawToken, String password) {
         PasswordPolicy.validate(password);
