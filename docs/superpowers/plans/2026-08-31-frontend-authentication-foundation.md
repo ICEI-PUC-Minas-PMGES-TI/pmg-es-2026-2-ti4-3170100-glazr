@@ -101,11 +101,11 @@
 **Files:**
 - Create: `frontend/src/shared/styles/tokens.css`
 - Create: `frontend/src/shared/styles/global.css`
-- Create: `frontend/src/pages/LoginPage.module.css`
-- Create: `frontend/src/pages/HomePage.module.css`
-- Create: `frontend/src/features/auth/components/LoginForm.module.css`
-- Create: `frontend/src/features/auth/components/UserSummary.module.css`
-- Create: `frontend/.dockerignore`
+- Create: `frontend/src/pages/LoginPage.css`
+- Create: `frontend/src/pages/HomePage.css`
+- Create: `frontend/src/features/auth/components/LoginForm.css`
+- Create: `frontend/src/features/auth/components/UserSummary.css`
+- Create: `.dockerignore`
 - Create: `infra/nginx/Dockerfile`
 - Modify: `infra/nginx/nginx.conf`
 - Modify: `compose.yaml`
@@ -115,7 +115,7 @@
 - Produces: frontend responsivo servido em `/`, SPA fallback e `/api/` preservado.
 
 - [ ] Implementar tokens, reset, layout responsivo, foco visível, `aria-live` e redução de movimento.
-- [ ] Configurar Dockerfile multi-stage com imagens fixadas: Node compila `frontend`, Nginx recebe somente `dist` e configuração.
+- [ ] Configurar Dockerfile multi-stage com Node 24.15.0 e Nginx 1.30.4 fixados: Node compila `frontend`, Nginx recebe somente `dist` e configuração.
 - [ ] Alterar o serviço `nginx` para buildar a imagem sem expor portas adicionais; manter healthcheck e dependência do backend saudável.
 - [ ] Configurar `try_files $uri $uri/ /index.html` somente na localização da SPA e preservar `/health` e `/api/`.
 - [ ] Rodar `npm run build` e `docker compose config`; inspecionar imagem e contexto para artefatos ou segredos.

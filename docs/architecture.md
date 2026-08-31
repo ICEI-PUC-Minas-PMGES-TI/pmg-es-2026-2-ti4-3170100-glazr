@@ -2,16 +2,15 @@
 
 ## Visão geral
 
-O Glazr começa como um monólito modular Java 21/Spring Boot 3.5.16. O único processo de aplicação contém autenticação, usuários, perfis e permissões, mas cada funcionalidade tem fronteiras de pacote e responsabilidades próprias. PostgreSQL é a fonte de verdade para dados de negócio, catálogo, locks de autenticação e sessões.
+O Glazr combina uma SPA React/TypeScript com um monólito modular Java 21/Spring Boot 3.5.16. O processo de aplicação contém autenticação, usuários, perfis e permissões, cada qual com fronteiras de pacote e responsabilidades próprias. PostgreSQL é a fonte de verdade para dados de negócio, catálogo, locks de autenticação e sessões.
 
 ```text
-Cliente futuro
+Browser
      |
-     | HTTP mesma origem, cookies + X-XSRF-TOKEN
      v
-  Nginx :8080
+Nginx :8080 ----> SPA React (arquivos estáticos + fallback)
      |
-     | /api/*
+     | /api/*, mesma origem, cookies + X-XSRF-TOKEN
      v
 Spring Boot :8080 ----------------------+
      |                                  |
@@ -20,7 +19,18 @@ Spring Boot :8080 ----------------------+
                  PostgreSQL :5432
 ```
 
-Somente o Nginx é publicado normalmente no host. A API e o banco comunicam-se pela rede interna do Compose.
+Somente o Nginx é publicado normalmente no host. Ele serve a SPA e encaminha a API; backend e banco comunicam-se pela rede interna do Compose.
+
+## Frontend
+
+O cliente é dividido por responsabilidade:
+
+- `app`: providers, router e guards de rota;
+- `pages`: composição das telas de login e área inicial;
+- `features/auth`: contratos, API, estado em memória, hooks e componentes da autenticação;
+- `shared`: cliente HTTP, Problem Details, componentes genéricos e design tokens.
+
+O cliente HTTP é a única fronteira para `fetch`, aplica `credentials: include`, interpreta JSON, `204` e `application/problem+json`. O módulo de autenticação obtém CSRF imediatamente antes de login e logout. O `AuthProvider` modela `loading`, `authenticated` e `unauthenticated`; a sessão é reconstruída por `/auth/me` e nunca armazenada no browser.
 
 ## Módulos
 
@@ -54,7 +64,7 @@ Controllers nunca usam repositories diretamente. A API retorna records DTO, não
 
 ### Login
 
-1. Cliente obtém CSRF e preserva `XSRF-TOKEN`.
+1. A SPA obtém CSRF e mantém o token apenas durante a mutação.
 2. Login normaliza apenas o e-mail e lê o hash sem manter uma transação longa.
 3. Senha é pré-processada por SHA-256/Base64 e comparada por BCrypt fora do lock; usuário desconhecido também executa comparação com hash sentinela.
 4. Uma segunda etapa transacional curta relê e bloqueia a conta pelo UUID observado, confirma que e-mail/hash não mudaram, revalida estado e registra a falha ou sucesso atomicamente.
@@ -98,7 +108,7 @@ Aplicação e banco usam UTC. UUIDs são gerados pela aplicação antes do `pers
 
 ## Operação
 
-O Dockerfile multi-stage compila pelo wrapper em JDK 21 e executa como usuário não root em JRE 21. Compose fixa imagens, mantém o banco em volume nomeado e condiciona o backend à saúde do PostgreSQL. Nginx limita corpo, configura timeouts, oculta sua versão e preserva headers do proxy.
+O Dockerfile do backend compila pelo wrapper em JDK 21 e executa como usuário não root em JRE 21. O Dockerfile do Nginx usa Node 24.15 em uma etapa de build reproduzível com `npm ci`, copia somente o `dist` para a imagem final e configura fallback da SPA sem interferir em `/api/` ou `/health`. Compose fixa imagens, mantém o banco em volume nomeado e condiciona o backend à saúde do PostgreSQL. Nginx limita corpo, configura timeouts, oculta sua versão e preserva headers do proxy.
 
 Os profiles Spring separam defaults locais, teste controlado e produção segura. Nenhum profile de produção possui senha padrão. `.env.example` contém apenas valores ilustrativos e é proibido versionar `.env`.
 
@@ -108,4 +118,4 @@ Os profiles Spring separam defaults locais, teste controlado e produção segura
 - Exclusão de sessões por principal complementa, mas não substitui, a revalidação.
 - O catálogo e o perfil protegido são dados de sistema versionados por migration; a senha inicial nunca entra em migration.
 - O update de perfil usa `PUT`, pois substitui seu estado administrativo e o conjunto de permissões de forma explícita.
-- Não há abstrações para multiempresa, mensageria ou frontend enquanto não existir requisito.
+- Não há abstrações para multiempresa, mensageria, estado global genérico ou biblioteca visual enquanto não existir requisito.

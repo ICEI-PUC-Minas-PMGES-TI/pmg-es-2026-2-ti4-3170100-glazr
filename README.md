@@ -1,6 +1,6 @@
-# Glazr — fundação do backend
+# Glazr
 
-Esta etapa entrega o backend inicial do Glazr, sistema interno de uma única vidraçaria. Inclui autenticação por e-mail e senha, sessões persistidas, usuários, perfis configuráveis, permissões predefinidas, PostgreSQL, Nginx e testes. Não há frontend nem cadastro público.
+O Glazr é o sistema interno de uma única vidraçaria. A fundação atual inclui uma SPA responsiva para autenticação, backend com sessões persistidas, usuários, perfis configuráveis, permissões predefinidas, PostgreSQL, Nginx e testes. Não há cadastro público.
 
 ## Tecnologias
 
@@ -8,8 +8,10 @@ Esta etapa entrega o backend inicial do Glazr, sistema interno de uma única vid
 - Maven 3.9.11 por Maven Wrapper 3.3.2;
 - PostgreSQL 17.11 e Flyway;
 - Spring Security, Spring Session JDBC e SHA-256/Base64 + BCrypt força 12 com formato versionado;
+- React 19, TypeScript strict, Vite 8 e React Router;
+- Vitest, Testing Library e MSW para uma suíte frontend enxuta;
 - Testcontainers 1.21.4, gerenciado pelo Spring Boot;
-- Docker Compose e Nginx stable 1.30.4.
+- Node 24.15 no build do frontend, Docker Compose e Nginx stable 1.30.4.
 
 O build não precisa de Maven, PostgreSQL ou Nginx instalados no host. Para executar fora de contêiner, é necessário um JDK 21 e acesso a PostgreSQL.
 
@@ -24,8 +26,14 @@ backend/                 aplicação Spring Boot, wrapper, migrations e testes
     permission/          catálogo somente leitura
     shared/              erros HTTP seguros
     configuration/       segurança e bootstrap
+frontend/                SPA React/TypeScript
+  src/
+    app/                 composição, rotas e guards
+    pages/               telas associadas às rotas
+    features/auth/       API, estado, hooks e componentes de autenticação
+    shared/              cliente HTTP, componentes e estilos
 docs/                    spec, arquitetura e plano de implementação
-infra/nginx/             proxy reverso
+infra/nginx/             build da SPA, arquivos estáticos e proxy reverso
 scripts/smoke-test.ps1   verificação ponta a ponta
 compose.yaml             PostgreSQL, backend e Nginx
 ```
@@ -51,7 +59,7 @@ docker compose --env-file .env up -d --wait
 docker compose ps
 ```
 
-A API fica disponível pelo Nginx em `http://localhost:8080/api/v1` por padrão. A rota `http://localhost:8080/health` verifica o Nginx; o backend expõe somente `/actuator/health` dentro da rede. PostgreSQL não publica porta no host.
+A aplicação fica disponível em `http://localhost:8080` por padrão e a API em `http://localhost:8080/api/v1`. O Nginx serve a SPA e encaminha `/api/` para o backend pela mesma origem. A rota `http://localhost:8080/health` verifica o Nginx; o backend expõe somente `/actuator/health` dentro da rede. PostgreSQL não publica porta no host.
 
 Logs e parada sem apagar dados:
 
@@ -62,6 +70,22 @@ docker compose down
 ```
 
 > **Atenção — apaga dados:** `docker compose down -v` remove também o volume `glazr_postgres_data`. Execute esse comando somente quando quiser descartar definitivamente o banco local.
+
+## Frontend e autenticação
+
+A SPA possui `/login` e a rota protegida `/`. Ao abrir a aplicação, ela consulta `/api/v1/auth/me` para restaurar uma sessão válida sem armazenar dados de autenticação no navegador. Login e logout obtêm um CSRF novo antes de cada `POST`; todas as chamadas usam cookies de mesma origem com `credentials: include`.
+
+O cookie `GLAZR_SESSION` é HttpOnly e nunca é lido pelo frontend. Senhas e tokens CSRF não são persistidos em `localStorage` ou `sessionStorage`. Respostas `401` removem o estado autenticado local e enviam o usuário ao login.
+
+Para desenvolver a interface com hot reload, mantenha a stack Docker ativa para atender a API e execute:
+
+```powershell
+Set-Location frontend
+npm ci
+npm run dev
+```
+
+Abra `http://localhost:5173`. O Vite encaminha `/api` para `http://localhost:8080`; a origem deve permanecer na allowlist local de `GLAZR_ALLOWED_ORIGINS`.
 
 ## Bootstrap do primeiro administrador
 
@@ -118,6 +142,20 @@ Profiles disponíveis: `dev` (default local/Compose), `test` (datasource forneci
 
 ## Testes
 
+Frontend, a partir de `frontend/`:
+
+```powershell
+npm ci
+npm run lint
+npm run typecheck
+npm run test:run
+npm run build
+```
+
+A suíte frontend possui cinco testes comportamentais focados no contrato HTTP, login, falha segura, proteção de rota, restauração de sessão e logout. Não há meta artificial de cobertura.
+
+Backend:
+
 ```powershell
 $env:JAVA_HOME = "C:\caminho\para\jdk-21"
 Set-Location backend
@@ -147,4 +185,4 @@ Erros usam `application/problem+json` com `code` estável e sem stack trace ou c
 
 ## Limitações desta etapa
 
-Não existem frontend, cadastro público, confirmação de e-mail, recuperação/redefinição/alteração de senha, OAuth/SSO/MFA, JWT, multiempresa, e-mail, exclusão física de usuário ou módulos comerciais. Frontend React/TypeScript e redefinição de senha permanecem próximos passos separados desta entrega.
+O frontend desta etapa cobre somente autenticação e uma área inicial do usuário. Não existem cadastro público, confirmação de e-mail, recuperação/redefinição/alteração de senha, OAuth/SSO/MFA, JWT, multiempresa, e-mail, exclusão física de usuário, telas administrativas ou módulos comerciais.
