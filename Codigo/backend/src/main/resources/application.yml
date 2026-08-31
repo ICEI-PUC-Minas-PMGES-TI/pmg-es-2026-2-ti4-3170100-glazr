@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: glazr-backend
+  profiles:
+    default: dev
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  session:
+    store-type: jdbc
+    timeout: ${GLAZR_SESSION_TIMEOUT:8h}
+    jdbc:
+      initialize-schema: never
+  jackson:
+    time-zone: UTC
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    from:
+      address: ${SMTP_FROM_ADDRESS:nao-responda@glazr.local}
+      name: ${SMTP_FROM_NAME:Glazr}
+    properties:
+      mail.smtp.starttls.enable: ${SMTP_TLS_ENABLED:false}
+
+server:
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+glazr:
+  public-base-url: ${GLAZR_PUBLIC_BASE_URL:http://localhost:8080}
+  invitation-ttl: ${GLAZR_INVITATION_TTL:48h}
+  password-reset-ttl: ${GLAZR_PASSWORD_RESET_TTL:30m}
+  google-auth-enabled: ${GLAZR_GOOGLE_AUTH_ENABLED:false}
+  allowed-origins: ${GLAZR_ALLOWED_ORIGINS:}
+  cookie:
+    secure: ${GLAZR_COOKIE_SECURE:false}
+  bootstrap:
+    admin:
+      email: ${GLAZR_BOOTSTRAP_ADMIN_EMAIL:}
+      password: ${GLAZR_BOOTSTRAP_ADMIN_PASSWORD:}
+      name: ${GLAZR_BOOTSTRAP_ADMIN_NAME:}

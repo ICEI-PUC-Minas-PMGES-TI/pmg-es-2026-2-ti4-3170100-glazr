@@ -1,0 +1,7 @@
+glazr:
+  cookie:
+    secure: false
+
+logging:
+  level:
+    org.testcontainers: INFO
