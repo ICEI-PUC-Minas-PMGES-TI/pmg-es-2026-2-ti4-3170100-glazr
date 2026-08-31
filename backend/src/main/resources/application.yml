@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: glazr-backend
+  profiles:
+    default: dev
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  session:
+    store-type: jdbc
+    timeout: ${GLAZR_SESSION_TIMEOUT:8h}
+    jdbc:
+      initialize-schema: never
+  jackson:
+    time-zone: UTC
+
+server:
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+glazr:
+  allowed-origins: ${GLAZR_ALLOWED_ORIGINS:}
+  cookie:
+    secure: ${GLAZR_COOKIE_SECURE:false}
+  bootstrap:
+    admin:
+      email: ${GLAZR_BOOTSTRAP_ADMIN_EMAIL:}
+      password: ${GLAZR_BOOTSTRAP_ADMIN_PASSWORD:}
+      name: ${GLAZR_BOOTSTRAP_ADMIN_NAME:}
