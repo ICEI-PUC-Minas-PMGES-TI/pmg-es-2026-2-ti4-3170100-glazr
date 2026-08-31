@@ -20,4 +20,9 @@ public class UserSessionService {
         Map<String, ? extends Session> found = sessions.findByPrincipalName(userId.toString());
         found.keySet().forEach(sessions::deleteById);
     }
+
+    public void deleteOtherSessions(UUID userId, String currentSessionId) {
+        Map<String, ? extends Session> found = sessions.findByPrincipalName(userId.toString());
+        found.keySet().stream().filter(id -> !id.equals(currentSessionId)).forEach(sessions::deleteById);
+    }
 }

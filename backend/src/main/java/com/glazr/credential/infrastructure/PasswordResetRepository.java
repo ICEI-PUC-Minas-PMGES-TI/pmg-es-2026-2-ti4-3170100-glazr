@@ -20,4 +20,6 @@ public interface PasswordResetRepository extends JpaRepository<PasswordResetEnti
               and reset.consumedAt is null and reset.revokedAt is null
             """)
     Optional<PasswordResetEntity> findUsableByUserIdForUpdate(@Param("userId") UUID userId);
+
+    Optional<PasswordResetEntity> findFirstByUserIdOrderByCreatedAtDesc(UUID userId);
 }
