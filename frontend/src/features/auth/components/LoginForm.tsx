@@ -1,12 +1,19 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 
 import { useAuth } from '../hooks/use-auth'
+import { getAuthenticationConfiguration, startGoogle } from '../api/auth-api'
 import './LoginForm.css'
 
 export function LoginForm() {
   const { clearError, error, isSubmitting, login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [googleEnabled, setGoogleEnabled] = useState(false)
+
+  useEffect(() => {
+    void getAuthenticationConfiguration().then((config) => setGoogleEnabled(config.googleEnabled)).catch(() => undefined)
+  }, [])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -68,7 +75,17 @@ export function LoginForm() {
         <button className="button button--primary" type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Entrando...' : 'Entrar'}
         </button>
+        <Link className="login-form__forgot" to="/forgot-password">Esqueci minha senha</Link>
       </form>
+
+      {googleEnabled ? (
+        <div className="login-card__google">
+          <span>ou</span>
+          <button className="button button--secondary" type="button" onClick={() => void startGoogle()}>
+            Entrar com Google
+          </button>
+        </div>
+      ) : null}
 
       <p className="login-card__support">Problemas para acessar? Procure o administrador do Glazr.</p>
     </div>

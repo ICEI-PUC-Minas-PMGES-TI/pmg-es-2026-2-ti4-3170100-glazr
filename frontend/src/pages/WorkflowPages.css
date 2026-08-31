@@ -1,0 +1,20 @@
+.workflow-page { min-height: 100vh; padding: clamp(1rem, 4vw, 3rem); background: radial-gradient(circle at 90% 0, var(--color-blue-100), transparent 28rem), var(--color-background); }
+.workflow-header { display: flex; width: min(100%, 72rem); align-items: center; justify-content: space-between; gap: 1rem; margin: 0 auto 2rem; }
+.workflow-header nav { display: flex; align-items: center; gap: 1rem; color: var(--color-blue-900); font-weight: 650; }
+.workflow-content { width: min(100%, 72rem); margin: 0 auto; }
+.workflow-card { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: clamp(1.25rem, 4vw, 2.25rem); background: var(--color-surface); box-shadow: var(--shadow-sm); }
+.workflow-card--narrow { width: min(100%, 34rem); margin: 4rem auto; }
+.workflow-form { display: grid; gap: 1rem; }
+.workflow-form label { display: grid; gap: .4rem; font-weight: 700; }
+.workflow-form input, .workflow-form select { width: 100%; min-height: 3rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: .7rem .85rem; background: white; }
+.workflow-actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+.workflow-feedback { padding: .8rem 1rem; border-radius: var(--radius-sm); color: var(--color-blue-900); background: var(--color-blue-050); }
+.workflow-error { color: var(--color-danger); background: var(--color-danger-soft); }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { padding: .85rem .65rem; border-bottom: 1px solid var(--color-border); text-align: left; vertical-align: top; }
+.data-table th { color: var(--color-text-muted); font-size: .75rem; text-transform: uppercase; }
+.badge { display: inline-flex; margin: .1rem; border-radius: 999px; padding: .2rem .55rem; color: var(--color-blue-900); background: var(--color-blue-050); font-size: .78rem; font-weight: 700; }
+.profile-options { display: grid; gap: .5rem; }
+.profile-options label { display: flex; align-items: center; gap: .6rem; font-weight: 500; }
+.profile-options input { width: auto; min-height: auto; }
+@media (max-width: 48rem) { .workflow-header, .workflow-header nav { align-items: flex-start; flex-direction: column; } .data-table { display: block; overflow-x: auto; } }

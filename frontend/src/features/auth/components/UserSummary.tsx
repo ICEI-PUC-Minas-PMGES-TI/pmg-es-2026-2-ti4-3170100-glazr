@@ -2,7 +2,7 @@ import { useAuth } from '../hooks/use-auth'
 import './UserSummary.css'
 
 export function UserSummary() {
-  const { isSubmitting, logout, user } = useAuth()
+  const { user } = useAuth()
 
   if (!user) return null
 
@@ -14,9 +14,6 @@ export function UserSummary() {
           <h1 id="welcome-title">Olá, {user.displayName}</h1>
           <p>Sua sessão está ativa. O Glazr está pronto para a próxima etapa.</p>
         </div>
-        <button className="button button--secondary" type="button" onClick={() => void logout()} disabled={isSubmitting}>
-          {isSubmitting ? 'Saindo...' : 'Sair'}
-        </button>
       </div>
 
       <div className="user-summary__grid">

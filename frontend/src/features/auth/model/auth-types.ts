@@ -3,8 +3,14 @@ export interface AuthenticatedUser {
   email: string
   displayName: string
   active: boolean
+  accountType: 'EMPLOYEE' | 'CUSTOMER'
   profiles: string[]
   permissions: string[]
+  authenticationMethods: Array<'PASSWORD' | 'GOOGLE'>
+}
+
+export interface AuthenticationConfiguration {
+  googleEnabled: boolean
 }
 
 export interface LoginCredentials {

@@ -33,6 +33,9 @@
   gap: 1.1rem;
 }
 
+.login-form__forgot { color: var(--color-blue-700); font-size: .9rem; text-align: right; }
+.login-card__google { display: grid; gap: .75rem; margin-top: 1rem; text-align: center; color: var(--color-text-muted); }
+
 .form-field {
   gap: 0.45rem;
 }
