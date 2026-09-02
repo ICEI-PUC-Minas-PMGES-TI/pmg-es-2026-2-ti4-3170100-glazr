@@ -109,6 +109,11 @@ O administrador cria o funcionário sem senha em `/admin/users/new`. A operaçã
 
 `GLAZR_PUBLIC_BASE_URL` deve conter somente a origem pública, sem caminho, query ou fragmento. Em produção configure SMTP externo pelas variáveis `SMTP_*`; o Compose deste repositório é a composição local de desenvolvimento e inclui Mailpit deliberadamente.
 
+Para enviar pelo Gmail com uma senha de app, configure no `.env` local `SMTP_HOST=smtp.gmail.com`,
+`SMTP_PORT=587`, `SMTP_USERNAME` com o endereço completo, `SMTP_PASSWORD` com a senha de app,
+`SMTP_AUTH_ENABLED=true` e `SMTP_TLS_ENABLED=true`. `SMTP_FROM_ADDRESS` é opcional e, quando omitido,
+usa o próprio `SMTP_USERNAME`. Nunca versione essas credenciais.
+
 ## Google OpenID Connect
 
 Google fica desligado com `GLAZR_GOOGLE_AUTH_ENABLED=false`; nesse estado a aplicação inicia sem credenciais e oculta os botões. Para habilitar:

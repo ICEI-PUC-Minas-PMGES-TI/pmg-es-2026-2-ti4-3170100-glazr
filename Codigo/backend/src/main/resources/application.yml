@@ -26,10 +26,15 @@ spring:
     username: ${SMTP_USERNAME:}
     password: ${SMTP_PASSWORD:}
     from:
-      address: ${SMTP_FROM_ADDRESS:nao-responda@glazr.local}
+      address: ${SMTP_FROM_ADDRESS:${SMTP_USERNAME:nao-responda@glazr.local}}
       name: ${SMTP_FROM_NAME:Glazr}
     properties:
+      mail.smtp.auth: ${SMTP_AUTH_ENABLED:false}
       mail.smtp.starttls.enable: ${SMTP_TLS_ENABLED:false}
+      mail.smtp.starttls.required: ${SMTP_TLS_ENABLED:false}
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
 
 server:
   port: ${SERVER_PORT:8080}
