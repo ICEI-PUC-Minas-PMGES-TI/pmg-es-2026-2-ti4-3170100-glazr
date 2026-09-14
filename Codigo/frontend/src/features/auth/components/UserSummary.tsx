@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Package, Shield, Users } from 'lucide-react'
+import { ArrowRight, Layers, Package, Shield, Users } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import './UserSummary.css'
 
@@ -9,6 +9,7 @@ export function UserSummary() {
   if (!user) return null
 
   const canManageUsers = user.permissions.includes('USER_READ') || user.permissions.includes('USER_CREATE')
+  const canManageGlasses = user.permissions.includes('GLASS_READ') || user.permissions.includes('GLASS_CREATE')
   const canManageKits = user.permissions.includes('KIT_READ') || user.permissions.includes('KIT_CREATE')
 
   return (
@@ -38,6 +39,25 @@ export function UserSummary() {
               </p>
               <div className="shortcut-card__action">
                 <span>Acessar módulo</span>
+                <ArrowRight size={16} />
+              </div>
+            </Link>
+          ) : null}
+
+          {canManageGlasses ? (
+            <Link to="/glasses" className="shortcut-card">
+              <div className="shortcut-card__header">
+                <div className="shortcut-card__icon">
+                  <Layers size={20} strokeWidth={2} />
+                </div>
+                <span className="shortcut-card__badge">Catálogo</span>
+              </div>
+              <h3 className="shortcut-card__title">Vidros e Chapas</h3>
+              <p className="shortcut-card__desc">
+                Consulte e cadastre vidros por espessura, acabamento, cor e precificação por metro quadrado.
+              </p>
+              <div className="shortcut-card__action">
+                <span>Acessar catálogo</span>
                 <ArrowRight size={16} />
               </div>
             </Link>

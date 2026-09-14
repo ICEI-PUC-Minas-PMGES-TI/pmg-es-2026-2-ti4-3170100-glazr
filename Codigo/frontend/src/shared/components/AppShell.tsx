@@ -11,6 +11,7 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
         <Link to="/">Página Inicial</Link>
         <Link to="/dashboard">Painel</Link>
         {user?.permissions.includes('USER_READ') ? <Link to="/admin/users">Funcionários</Link> : null}
+        {user?.permissions.includes('GLASS_READ') ? <Link to="/glasses">Vidros</Link> : null}
         {user?.permissions.includes('KIT_READ') ? <Link to="/admin/kits">Kits</Link> : null}
         <Link to="/account/security">Segurança</Link>
         <button className="button button--secondary" type="button" onClick={() => void logout()}>Sair</button>
