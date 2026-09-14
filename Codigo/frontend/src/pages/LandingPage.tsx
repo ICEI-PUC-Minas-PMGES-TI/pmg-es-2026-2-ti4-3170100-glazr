@@ -99,7 +99,7 @@ export function LandingPage() {
       <header className="lp-nav">
         <div className="lp-nav__inner">
           <Brand authenticated={isAuthenticated} className="lp-brand">
-            <span className="lp-brand__mark" aria-hidden="true">G</span>
+            <img src="/glazr-fav-icon.png" alt="Glazr Logo" className="lp-brand__logo" />
             {' '}
             Glazr
           </Brand>
@@ -109,6 +109,15 @@ export function LandingPage() {
 
       {/* ── HERO ── */}
       <div className="lp-hero">
+        <video
+          className="lp-hero__video"
+          autoPlay
+          loop
+          muted
+          playsInline
+          src="/Glass_character_waving_hello_1080p_20260914105221.mp4"
+        />
+        <div className="lp-hero__overlay" aria-hidden="true" />
         <div className="lp-hero__inner">
           <motion.p
             className="lp-eyebrow"
@@ -230,7 +239,7 @@ export function LandingPage() {
       <footer className="lp-footer">
         <div className="lp-nav__inner">
           <Brand authenticated={isAuthenticated} className="lp-footer__brand">
-            <span className="lp-brand__mark lp-brand__mark--sm" aria-hidden="true">G</span>
+            <img src="/glazr-fav-icon.png" alt="Glazr Logo" className="lp-brand__logo lp-brand__logo--sm" />
             {' '}
             Glazr
           </Brand>

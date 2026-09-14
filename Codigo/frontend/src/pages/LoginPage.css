@@ -19,6 +19,29 @@
   background: linear-gradient(145deg, var(--color-blue-900), var(--color-blue-700));
 }
 
+.login-page__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.login-page__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    145deg,
+    rgb(10 25 42 / 85%) 0%,
+    rgb(20 48 78 / 80%) 50%,
+    rgb(10 25 42 / 92%) 100%
+  );
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
 .login-page__message {
   position: relative;
   z-index: 1;

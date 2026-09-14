@@ -66,6 +66,20 @@ p {
   letter-spacing: -0.03em;
 }
 
+.brand__logo {
+  width: 2.35rem;
+  height: 2.35rem;
+  object-fit: contain;
+  border-radius: var(--radius-xs);
+  box-shadow: 0 4px 14px rgb(4 19 33 / 14%);
+}
+
+.brand__logo--compact {
+  width: 2rem;
+  height: 2rem;
+  box-shadow: 0 2px 8px rgb(47 85 127 / 16%);
+}
+
 .brand__mark,
 .app-loading__mark {
   display: grid;

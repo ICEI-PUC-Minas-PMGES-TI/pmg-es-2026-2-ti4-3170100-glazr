@@ -6,7 +6,10 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
   const { logout, user } = useAuth()
   return <main className="workflow-page">
     <header className="workflow-header">
-      <Link className="brand brand--compact" to="/dashboard"><span className="brand__mark">G</span><span>Glazr</span></Link>
+      <Link className="brand brand--compact" to="/dashboard">
+        <img src="/glazr-fav-icon.png" alt="Glazr Logo" className="brand__logo brand__logo--compact" />
+        <span>Glazr</span>
+      </Link>
       <nav aria-label="Navegação principal">
         <Link to="/">Página Inicial</Link>
         <Link to="/dashboard">Painel</Link>
