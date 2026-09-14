@@ -9,6 +9,7 @@ import { ResetPasswordPage } from '../pages/ResetPasswordPage'
 import { AccountSecurityPage } from '../pages/AccountSecurityPage'
 import { AdminUsersPage } from '../pages/AdminUsersPage'
 import { NewAdminUserPage } from '../pages/NewAdminUserPage'
+import { EditAdminUserPage } from '../pages/EditAdminUserPage'
 import { AdminKitsPage } from '../pages/AdminKitsPage'
 import { NewAdminKitPage } from '../pages/NewAdminKitPage'
 import { ProtectedRoute } from './ProtectedRoute'
@@ -31,6 +32,7 @@ export function AppRoutes() {
         <Route path="/account/security" element={<AccountSecurityPage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
         <Route path="/admin/users/new" element={<NewAdminUserPage />} />
+        <Route path="/admin/users/:id/edit" element={<EditAdminUserPage />} />
         <Route path="/admin/kits" element={<AdminKitsPage />} />
         <Route path="/admin/kits/new" element={<NewAdminKitPage />} />
       </Route>

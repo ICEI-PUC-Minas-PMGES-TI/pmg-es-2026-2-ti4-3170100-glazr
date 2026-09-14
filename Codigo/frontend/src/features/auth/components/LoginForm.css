@@ -1,12 +1,6 @@
 .login-card {
-  width: min(100%, 27rem);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  padding: clamp(1.5rem, 5vw, 2.6rem);
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  box-shadow: var(--shadow-lg), var(--glass-reflection);
+  width: min(100%, 30rem);
+  padding: clamp(0.5rem, 1vw, 0.75rem);
 }
 
 .login-card__header {

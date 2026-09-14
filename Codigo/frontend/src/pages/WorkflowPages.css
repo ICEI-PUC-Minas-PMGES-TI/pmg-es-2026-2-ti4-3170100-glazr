@@ -190,13 +190,199 @@
   margin: 0.15rem 0.25rem 0.15rem 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xs);
-  padding: 0.2rem 0.5rem;
+  padding: 0.2rem 0.55rem;
   color: var(--color-blue-900);
   background: var(--color-blue-050);
   font-family: var(--font-heading);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.02em;
+}
+
+.badge--admin {
+  color: #102a43;
+  background: #e0ecf8;
+  border-color: #9cbddc;
+}
+
+.badge--seller {
+  color: #0d5f4e;
+  background: #e2f5ee;
+  border-color: #88d4bf;
+}
+
+.badge--active {
+  color: var(--color-success);
+  background: var(--color-success-soft);
+  border-color: rgb(39 113 94 / 30%);
+}
+
+.badge--inactive {
+  color: #617182;
+  background: #eef2f5;
+  border-color: #d1dce5;
+}
+
+/* ── Filter Bar & Item Counter ── */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1.5rem 0 0.5rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg-subtle);
+  backdrop-filter: blur(var(--glass-blur-sm));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+}
+
+.filter-search {
+  position: relative;
+  flex: 1;
+  min-width: 14rem;
+  max-width: 24rem;
+}
+
+.filter-search input {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  color: var(--color-text);
+  background: rgb(255 255 255 / 90%);
+  font-size: 0.88rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.filter-search input:focus-visible {
+  border-color: var(--color-blue-700);
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(127 166 201 / 30%);
+}
+
+.filter-search__icon {
+  position: absolute;
+  top: 50%;
+  left: 0.7rem;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.filter-select {
+  min-height: 2.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  padding: 0.45rem 0.75rem;
+  color: var(--color-text);
+  background: rgb(255 255 255 / 90%);
+  font-size: 0.88rem;
+  font-family: var(--font-heading);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.filter-select:hover {
+  border-color: var(--color-blue-300);
+}
+
+.filter-select:focus-visible {
+  border-color: var(--color-blue-700);
+  outline: none;
+}
+
+.item-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.item-counter strong {
+  color: var(--color-blue-950);
+}
+
+/* ── Interactive Profile Cards (Selection) ── */
+.profile-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.85rem;
+  margin: 0.4rem 0;
+}
+
+.profile-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  background: rgb(255 255 255 / 80%);
+  cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.profile-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-blue-300);
+  background: var(--color-blue-050);
+}
+
+.profile-card--selected {
+  border-color: var(--color-blue-700);
+  background: var(--color-blue-050);
+  box-shadow: 0 0 0 2px var(--color-blue-300), var(--glass-reflection);
+}
+
+.profile-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.profile-card__icon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: var(--radius-xs);
+  color: var(--color-blue-700);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.profile-card__title {
+  margin: 0 0 0.3rem;
+  color: var(--color-blue-950);
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.profile-card__desc {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
 }
 
 .profile-options {

@@ -46,17 +46,24 @@
 }
 
 .login-page__access {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: clamp(1.25rem, 5vw, 4rem);
+  background: var(--color-surface);
 }
 
 @media (min-width: 56rem) {
   .login-page {
     grid-template-columns: minmax(28rem, 1.08fr) minmax(26rem, 0.92fr);
+    align-items: stretch;
   }
 
   .login-page__intro {
+    min-height: 100vh;
+  }
+
+  .login-page__access {
     min-height: 100vh;
   }
 

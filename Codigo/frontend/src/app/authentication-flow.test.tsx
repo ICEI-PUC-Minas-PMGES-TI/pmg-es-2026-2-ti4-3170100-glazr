@@ -59,7 +59,31 @@ it('entra com sessão e CSRF válidos', async () => {
   await user.click(screen.getByRole('button', { name: 'Entrar' }))
 
   expect(await screen.findByText('Olá, Gestor da Vidraçaria')).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Página Inicial' })).toHaveAttribute('href', '/')
+  expect(screen.getByRole('link', { name: 'Painel' })).toHaveAttribute('href', '/dashboard')
   expect(window.location.pathname).toBe('/dashboard')
+})
+
+it('mostra CTA pública na landing para visitante', async () => {
+  server.use(http.get('http://localhost/api/v1/auth/me', () => HttpResponse.json(authenticationRequired, { status: 401 })))
+
+  render(<App />)
+
+  const callToActions = await screen.findAllByRole('link', { name: 'Entrar no sistema' })
+  expect(callToActions).toHaveLength(3)
+  callToActions.forEach((link) => expect(link).toHaveAttribute('href', '/login'))
+  expect(screen.getAllByText('Glazr')).toHaveLength(2)
+})
+
+it('troca a landing para painel quando autenticado', async () => {
+  server.use(http.get('http://localhost/api/v1/auth/me', () => HttpResponse.json(authenticatedUser)))
+
+  render(<App />)
+
+  const callToActions = await screen.findAllByRole('link', { name: 'Ir para o Painel' })
+  expect(callToActions).toHaveLength(3)
+  callToActions.forEach((link) => expect(link).toHaveAttribute('href', '/dashboard'))
+  expect(screen.getAllByRole('link', { name: 'Glazr — página inicial' })).toHaveLength(2)
 })
 
 it('mostra erro genérico e limpa a senha quando as credenciais são inválidas', async () => {

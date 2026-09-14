@@ -1,7 +1,8 @@
-import { useRef } from 'react'
+import { useRef, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useInView, type Variants } from 'framer-motion'
 import { FileText, Users, BarChart2, Package, MessageSquare, Layers } from 'lucide-react'
+import { useAuth } from '../features/auth/hooks/use-auth'
 import './LandingPage.css'
 
 // ── Animation helpers ──────────────────────────────────────────
@@ -16,7 +17,7 @@ const fadeUp: Variants = {
   }),
 }
 
-function Section({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+function Section({ children, className = '' }: Readonly<{ children: ReactNode; className?: string }>) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
   return (
@@ -27,6 +28,20 @@ function Section({ children, className = '' }: { children: React.ReactNode; clas
     >
       {children}
     </section>
+  )
+}
+
+function Brand({
+  authenticated,
+  className,
+  children,
+}: Readonly<{ authenticated: boolean; className: string; children: ReactNode }>) {
+  return authenticated ? (
+    <Link className={className} to="/" aria-label="Glazr — página inicial">
+      {children}
+    </Link>
+  ) : (
+    <span className={className}>{children}</span>
   )
 }
 
@@ -73,16 +88,22 @@ const steps = [
 
 // ── Page ───────────────────────────────────────────────────────
 export function LandingPage() {
+  const { status } = useAuth()
+  const isAuthenticated = status === 'authenticated'
+  const primaryActionLabel = isAuthenticated ? 'Ir para o Painel' : 'Entrar no sistema'
+  const primaryActionTo = isAuthenticated ? '/dashboard' : '/login'
+
   return (
     <div className="lp-root">
       {/* ── NAV ── */}
       <header className="lp-nav">
         <div className="lp-nav__inner">
-          <span className="lp-brand">
+          <Brand authenticated={isAuthenticated} className="lp-brand">
             <span className="lp-brand__mark" aria-hidden="true">G</span>
+            {' '}
             Glazr
-          </span>
-          <Link to="/login" className="lp-btn lp-btn--ghost">Entrar no sistema</Link>
+          </Brand>
+          <Link to={primaryActionTo} className="lp-btn lp-btn--ghost">{primaryActionLabel}</Link>
         </div>
       </header>
 
@@ -123,7 +144,7 @@ export function LandingPage() {
             animate="visible"
             custom={3}
           >
-            <Link to="/login" className="lp-btn lp-btn--primary">Acessar o sistema</Link>
+            <Link to={primaryActionTo} className="lp-btn lp-btn--primary">{primaryActionLabel}</Link>
           </motion.div>
         </div>
 
@@ -200,7 +221,7 @@ export function LandingPage() {
             Acesse o sistema agora e comece a usar todas as funcionalidades.
           </motion.p>
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2}>
-            <Link to="/login" className="lp-btn lp-btn--primary lp-btn--lg">Acessar o sistema</Link>
+            <Link to={primaryActionTo} className="lp-btn lp-btn--primary lp-btn--lg">{primaryActionLabel}</Link>
           </motion.div>
         </div>
       </Section>
@@ -208,10 +229,11 @@ export function LandingPage() {
       {/* ── FOOTER ── */}
       <footer className="lp-footer">
         <div className="lp-nav__inner">
-          <span className="lp-footer__brand">
+          <Brand authenticated={isAuthenticated} className="lp-footer__brand">
             <span className="lp-brand__mark lp-brand__mark--sm" aria-hidden="true">G</span>
+            {' '}
             Glazr
-          </span>
+          </Brand>
           <span className="lp-footer__copy">© {new Date().getFullYear()} Glazr. Todos os direitos reservados.</span>
         </div>
       </footer>
