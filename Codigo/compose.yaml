@@ -16,6 +16,8 @@ services:
 
   postgres:
     image: postgres:17.11-alpine3.24
+    ports:
+      - "${DB_PORT:-5432}:5432"
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
