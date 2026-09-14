@@ -18,7 +18,6 @@ export function UserSummary() {
         <div>
           <p className="eyebrow">Painel Principal</p>
           <h1 id="welcome-title">Olá, {user.displayName}</h1>
-          <p>Sua sessão está ativa no Glazr. Acesse os módulos disponíveis abaixo.</p>
         </div>
       </div>
 
@@ -98,27 +97,6 @@ export function UserSummary() {
               <ArrowRight size={16} />
             </div>
           </Link>
-        </div>
-      </div>
-
-      <div className="user-summary__section">
-        <h2 className="section-title">Informações da Sessão</h2>
-        <div className="session-grid">
-          <article className="info-card">
-            <p className="info-card__label">Conta Conectada</p>
-            <strong>{user.email}</strong>
-            <span className="status-badge">Sessão ativa</span>
-          </article>
-          <article className="info-card">
-            <p className="info-card__label">Perfis de Acesso</p>
-            <div className="tag-list">
-              {user.profiles.map((profile) => (
-                <span className="tag" key={profile}>
-                  {profile}
-                </span>
-              ))}
-            </div>
-          </article>
         </div>
       </div>
     </section>
