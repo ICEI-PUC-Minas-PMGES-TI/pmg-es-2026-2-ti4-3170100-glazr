@@ -103,9 +103,13 @@ class BackendIntegrationTest {
                 where access_profile_id = '00000000-0000-0000-0000-000000000001'
                 """, Integer.class);
 
-        assertThat(migrations).isEqualTo(8);
+        assertThat(migrations).isEqualTo(9);
         assertThat(permissions).isEqualTo(18);
         assertThat(adminPermissions).isEqualTo(18);
+        assertThat(jdbc.queryForObject("""
+                select count(*) from information_schema.tables
+                where table_schema = 'public' and table_name = 'glass_sheets'
+                """, Integer.class)).isEqualTo(1);
     }
 
     @Test
