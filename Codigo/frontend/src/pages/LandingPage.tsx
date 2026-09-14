@@ -60,7 +60,7 @@ const features: { icon: React.ReactNode; title: string; desc: string }[] = [
   {
     icon: <Layers size={22} strokeWidth={1.8} />,
     title: 'Controle de estoque',
-    desc: 'Baixa automática ao confirmar venda, alertas de estoque mínimo e cálculo de aproveitamento de chapa.',
+    desc: 'Controle de chapas, alertas de estoque mínimo e acompanhamento do aproveitamento de cada corte.',
   },
   {
     icon: <Users size={22} strokeWidth={1.8} />,
@@ -82,7 +82,7 @@ const features: { icon: React.ReactNode; title: string; desc: string }[] = [
 const steps = [
   { num: '01', label: 'Cadastre vidros, kits e cores com seus respectivos preços por m².' },
   { num: '02', label: 'Gere um orçamento para o cliente com múltiplos itens e descontos.' },
-  { num: '03', label: 'Confirme a venda — o estoque baixa e o fornecedor é notificado via WhatsApp.' },
+  { num: '03', label: 'Registre as chapas e os cortes para acompanhar o saldo e o aproveitamento do material.' },
   { num: '04', label: 'Acompanhe tudo no dashboard: entregas, finanças e desempenho por vendedor.' },
 ]
 

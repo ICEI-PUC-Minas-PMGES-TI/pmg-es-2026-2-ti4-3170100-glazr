@@ -1,10 +1,22 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Layers, Package, Shield, Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { AlertTriangle, ArrowRight, Layers, Package, Shield, Users } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
+import { listLowStockAlerts, type GlassStockSummary } from '../../inventory/api/inventory-api'
 import './UserSummary.css'
 
 export function UserSummary() {
   const { user } = useAuth()
+  const [lowStock, setLowStock] = useState<ReadonlyArray<GlassStockSummary>>([])
+  const [alertsUnavailable, setAlertsUnavailable] = useState(false)
+  const canReadInventory = user?.permissions.includes('GLASS_READ') ?? false
+
+  useEffect(() => {
+    if (!canReadInventory) return
+    void listLowStockAlerts()
+      .then((items) => setLowStock(items))
+      .catch(() => setAlertsUnavailable(true))
+  }, [canReadInventory])
 
   if (!user) return null
 
@@ -22,6 +34,20 @@ export function UserSummary() {
       </div>
 
       <div className="user-summary__section">
+        {canReadInventory ? <section className="inventory-dashboard" aria-labelledby="inventory-alerts-title">
+          <div>
+            <p className="eyebrow">Estoque</p>
+            <h2 id="inventory-alerts-title">Alertas de estoque</h2>
+          </div>
+          {alertsUnavailable ? <p>Não foi possível consultar os alertas de estoque agora.</p> : null}
+          {!alertsUnavailable && lowStock.length === 0 ? <p>Nenhum tipo de vidro atingiu o estoque mínimo.</p> : null}
+          {!alertsUnavailable && lowStock.length > 0 ? <div className="inventory-dashboard__alerts">
+            <AlertTriangle size={20} aria-hidden="true" />
+            <p><strong>{lowStock.length} tipo(s) de vidro</strong> estão no estoque mínimo ou abaixo dele.</p>
+            <Link className="button button--secondary" to="/inventory">Ver estoque</Link>
+          </div> : null}
+        </section> : null}
+
         <h2 className="section-title">Módulos do Sistema</h2>
         <div className="shortcut-grid">
           {canManageUsers ? (
@@ -57,6 +83,25 @@ export function UserSummary() {
               </p>
               <div className="shortcut-card__action">
                 <span>Acessar catálogo</span>
+                <ArrowRight size={16} />
+              </div>
+            </Link>
+          ) : null}
+
+          {canReadInventory ? (
+            <Link to="/inventory" className="shortcut-card">
+              <div className="shortcut-card__header">
+                <div className="shortcut-card__icon">
+                  <Layers size={20} strokeWidth={2} />
+                </div>
+                <span className="shortcut-card__badge">Materiais</span>
+              </div>
+              <h3 className="shortcut-card__title">Estoque de Chapas</h3>
+              <p className="shortcut-card__desc">
+                Acompanhe saldo em m², configure mínimos e registre recebimentos, cortes e sobras úteis.
+              </p>
+              <div className="shortcut-card__action">
+                <span>Acessar estoque</span>
                 <ArrowRight size={16} />
               </div>
             </Link>

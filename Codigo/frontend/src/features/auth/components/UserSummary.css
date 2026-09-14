@@ -31,6 +31,41 @@
   margin-bottom: 2.5rem;
 }
 
+.inventory-dashboard {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 1.2rem;
+  background: var(--glass-bg);
+  box-shadow: var(--shadow-sm), var(--glass-reflection);
+}
+
+.inventory-dashboard h2 {
+  margin: 0.2rem 0 0;
+  color: var(--color-blue-950);
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+}
+
+.inventory-dashboard p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.inventory-dashboard__alerts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  color: #a03a14;
+}
+
+.inventory-dashboard__alerts p {
+  flex: 1;
+}
+
 .section-title {
   margin-bottom: 1.1rem;
   color: var(--color-blue-950);
@@ -227,4 +262,3 @@
     grid-template-columns: 1fr;
   }
 }
-
