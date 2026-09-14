@@ -45,6 +45,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -380,6 +381,47 @@ class BackendIntegrationTest {
                 .andExpect(status().isNoContent());
         assertThat(jdbc.queryForObject(
                 "select count(*) from kit_components where kit_id = ?", Integer.class, kitId)).isZero();
+    }
+
+    @Test
+    void administratorReplacesKitAndSwapsItsComponents() throws Exception {
+        Cookie adminSession = login(ADMIN_EMAIL, ADMIN_PASSWORD);
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+
+        MvcResult created = mvc.perform(post("/api/v1/kits")
+                        .cookie(adminSession).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"Kit Original %s","color":"Incolor","price":100.00,
+                                 "components":[{"name":"Vidro 6mm","quantity":1,"notes":null}]}
+                                """.formatted(suffix)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        JsonNode kit = objectMapper.readTree(created.getResponse().getContentAsByteArray());
+        UUID kitId = UUID.fromString(kit.get("id").asText());
+
+        mvc.perform(put("/api/v1/kits/{id}", kitId)
+                        .cookie(adminSession).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"Kit Atualizado %s","color":"Fumê","price":200.50,
+                                 "components":[{"name":"Vidro 8mm","quantity":2,"notes":"novo"},
+                                               {"name":"Ferragem","quantity":1,"notes":null}]}
+                                """.formatted(suffix)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Kit Atualizado " + suffix))
+                .andExpect(jsonPath("$.components.length()").value(2))
+                .andExpect(jsonPath("$.components[0].name").value("Ferragem"))
+                .andExpect(jsonPath("$.components[1].name").value("Vidro 8mm"));
+
+        assertThat(jdbc.queryForObject(
+                "select count(*) from kit_components where kit_id = ?", Integer.class, kitId)).isEqualTo(2);
+
+        mvc.perform(delete("/api/v1/kits/{id}", kitId).cookie(adminSession).with(csrf()))
+                .andExpect(status().isNoContent());
+        mvc.perform(get("/api/v1/kits/{id}", kitId).cookie(adminSession))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 
     private Cookie login(String email, String password) throws Exception {
