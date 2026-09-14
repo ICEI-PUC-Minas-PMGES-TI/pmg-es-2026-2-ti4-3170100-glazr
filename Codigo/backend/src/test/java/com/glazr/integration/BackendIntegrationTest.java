@@ -45,6 +45,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.verify;
@@ -101,9 +102,9 @@ class BackendIntegrationTest {
                 where access_profile_id = '00000000-0000-0000-0000-000000000001'
                 """, Integer.class);
 
-        assertThat(migrations).isEqualTo(5);
-        assertThat(permissions).isEqualTo(10);
-        assertThat(adminPermissions).isEqualTo(10);
+        assertThat(migrations).isEqualTo(6);
+        assertThat(permissions).isEqualTo(14);
+        assertThat(adminPermissions).isEqualTo(14);
     }
 
     @Test
@@ -159,7 +160,7 @@ class BackendIntegrationTest {
         mvc.perform(get("/api/v1/auth/me").cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(ADMIN_EMAIL))
-                .andExpect(jsonPath("$.permissions.length()").value(10));
+                .andExpect(jsonPath("$.permissions.length()").value(14));
         assertThat(jdbc.queryForObject("select count(*) from spring_session", Integer.class)).isPositive();
 
         mvc.perform(post("/api/v1/auth/logout").cookie(session).with(csrf()))
@@ -340,6 +341,45 @@ class BackendIntegrationTest {
                         .content("{\"active\":false}"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("LAST_ACTIVE_ADMINISTRATOR"));
+    }
+
+    @Test
+    void administratorCreatesKitWithComponentsAndCascadesOnDelete() throws Exception {
+        Cookie adminSession = login(ADMIN_EMAIL, ADMIN_PASSWORD);
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+
+        MvcResult created = mvc.perform(post("/api/v1/kits")
+                        .cookie(adminSession).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"Kit Box %s","color":"Incolor","price":1250.00,
+                                 "components":[{"name":"Vidro 8mm","quantity":2,"notes":"opcional"}]}
+                                """.formatted(suffix)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Kit Box " + suffix))
+                .andExpect(jsonPath("$.color").value("Incolor"))
+                .andExpect(jsonPath("$.components.length()").value(1))
+                .andExpect(jsonPath("$.components[0].name").value("Vidro 8mm"))
+                .andExpect(jsonPath("$.components[0].quantity").value(2))
+                .andReturn();
+        JsonNode kit = objectMapper.readTree(created.getResponse().getContentAsByteArray());
+        UUID kitId = UUID.fromString(kit.get("id").asText());
+
+        mvc.perform(post("/api/v1/kits")
+                        .cookie(adminSession).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"kit box %s","color":"Incolor","price":10.00,
+                                 "components":[{"name":"Vidro","quantity":1,"notes":null}]}
+                                """.formatted(suffix)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("DUPLICATE_KIT"));
+
+        mvc.perform(delete("/api/v1/kits/{id}", kitId)
+                        .cookie(adminSession).with(csrf()))
+                .andExpect(status().isNoContent());
+        assertThat(jdbc.queryForObject(
+                "select count(*) from kit_components where kit_id = ?", Integer.class, kitId)).isZero();
     }
 
     private Cookie login(String email, String password) throws Exception {
