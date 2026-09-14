@@ -36,13 +36,20 @@ a {
 
 h1,
 h2,
+h3,
+h4 {
+  margin-top: 0;
+  font-family: var(--font-heading);
+  letter-spacing: -0.025em;
+}
+
 p {
   margin-top: 0;
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-blue-300);
-  outline-offset: 3px;
+  outline: 2px solid var(--color-blue-500);
+  outline-offset: 2px;
 }
 
 .brand {
@@ -53,24 +60,27 @@ p {
   gap: 0.75rem;
   width: fit-content;
   color: var(--color-surface);
+  font-family: var(--font-heading);
   font-size: 1.45rem;
   font-weight: 750;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
 }
 
 .brand__mark,
 .app-loading__mark {
   display: grid;
-  width: 2.55rem;
-  height: 2.55rem;
+  width: 2.35rem;
+  height: 2.35rem;
   place-items: center;
-  border: 1px solid rgb(255 255 255 / 25%);
-  border-radius: 0.8rem;
+  border: 1px solid rgb(255 255 255 / 35%);
+  border-radius: var(--radius-xs);
   color: var(--color-blue-900);
   background: var(--color-surface);
-  box-shadow: 0 10px 28px rgb(4 19 33 / 18%);
-  font-size: 1.15rem;
+  box-shadow: 0 4px 14px rgb(4 19 33 / 14%), inset 0 1px 0 rgb(255 255 255 / 90%);
+  font-size: 1.1rem;
   font-weight: 800;
+  backdrop-filter: blur(var(--glass-blur-sm));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
 }
 
 .brand--compact {
@@ -85,26 +95,31 @@ p {
 .eyebrow {
   margin-bottom: 0.65rem;
   color: var(--color-blue-500);
-  font-size: 0.75rem;
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.13em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .button {
   display: inline-flex;
-  min-height: 3rem;
+  min-height: 2.85rem;
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  padding: 0.7rem 1.15rem;
+  padding: 0.65rem 1.25rem;
   cursor: pointer;
-  font-weight: 750;
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
   transition:
     transform var(--transition),
     box-shadow var(--transition),
-    background var(--transition);
+    background var(--transition),
+    border-color var(--transition);
 }
 
 .button:not(:disabled):hover {
@@ -113,29 +128,35 @@ p {
 
 .button:disabled {
   cursor: wait;
-  opacity: 0.68;
+  opacity: 0.65;
 }
 
 .button--primary {
   color: var(--color-surface);
-  background: var(--color-blue-700);
-  box-shadow: 0 10px 24px rgb(47 85 127 / 24%);
+  border: 1px solid rgb(255 255 255 / 15%);
+  background: linear-gradient(180deg, var(--color-blue-700) 0%, var(--color-blue-900) 100%);
+  box-shadow: 0 4px 14px rgb(47 85 127 / 25%), inset 0 1px 0 rgb(255 255 255 / 25%);
 }
 
 .button--primary:not(:disabled):hover {
-  background: var(--color-blue-900);
-  box-shadow: 0 14px 28px rgb(47 85 127 / 30%);
+  border-color: rgb(255 255 255 / 25%);
+  background: linear-gradient(180deg, var(--color-blue-900) 0%, var(--color-blue-950) 100%);
+  box-shadow: 0 6px 20px rgb(47 85 127 / 35%), inset 0 1px 0 rgb(255 255 255 / 35%);
 }
 
 .button--secondary {
   color: var(--color-blue-900);
-  border-color: var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  background: rgb(255 255 255 / 80%);
+  backdrop-filter: blur(var(--glass-blur-sm));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+  box-shadow: 0 2px 8px rgb(23 42 58 / 4%), inset 0 1px 0 rgb(255 255 255 / 90%);
 }
 
 .button--secondary:not(:disabled):hover {
   border-color: var(--color-blue-300);
   background: var(--color-blue-050);
+  box-shadow: 0 4px 14px rgb(47 85 127 / 12%), inset 0 1px 0 rgb(255 255 255 / 100%);
 }
 
 .app-loading {

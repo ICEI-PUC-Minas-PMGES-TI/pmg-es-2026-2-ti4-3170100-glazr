@@ -1,10 +1,16 @@
+@import url("https://fonts.googleapis.com/css2?family=Actor&family=Geologica:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Lexend:wght@300;400;500;600;700&display=swap");
+
 :root {
   color-scheme: light;
-  font-family:
-    Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: "Geologica", "Inter", "Lexend", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: "Geologica", "Lexend", "Actor", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+
+  font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 
+  /* Cores da paleta Glazr */
   --color-blue-950: #102a43;
   --color-blue-900: #1e3a5f;
   --color-blue-700: #2f557f;
@@ -17,15 +23,40 @@
   --color-text: #172a3a;
   --color-text-muted: #5f7283;
   --color-border: #cddde9;
+  --color-border-subtle: rgb(205 221 233 / 45%);
   --color-danger: #a33a48;
   --color-danger-soft: #fcebed;
   --color-success: #27715e;
   --color-success-soft: #e4f3ee;
 
-  --shadow-sm: 0 8px 24px rgb(23 42 58 / 8%);
-  --shadow-lg: 0 28px 70px rgb(16 42 67 / 18%);
-  --radius-sm: 0.625rem;
-  --radius-md: 1rem;
-  --radius-lg: 1.5rem;
-  --transition: 160ms ease;
+  /* Glassmorphism & Transparências */
+  --glass-bg: rgb(255 255 255 / 75%);
+  --glass-bg-subtle: rgb(255 255 255 / 45%);
+  --glass-bg-hover: rgb(255 255 255 / 90%);
+  --glass-bg-dark: rgb(16 42 67 / 78%);
+  --glass-border: rgb(255 255 255 / 65%);
+  --glass-border-subtle: rgb(205 221 233 / 50%);
+  --glass-border-dark: rgb(255 255 255 / 14%);
+  --glass-blur: 16px;
+  --glass-blur-sm: 8px;
+  --glass-shadow: 0 8px 32px 0 rgb(16 42 67 / 6%);
+  --glass-reflection: inset 0 1px 0 rgb(255 255 255 / 85%);
+
+  /* Sombras sutis */
+  --shadow-sm: 0 4px 16px rgb(23 42 58 / 6%);
+  --shadow-md: 0 8px 28px rgb(23 42 58 / 8%);
+  --shadow-lg: 0 20px 50px rgb(16 42 67 / 12%);
+  --shadow-glow: 0 0 0 1px var(--color-blue-300), 0 4px 20px rgb(47 85 127 / 18%);
+
+  /* Micro-arredondamentos sutis (2px a 4px) */
+  --radius-none: 0;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+
+  /* Transições suaves */
+  --transition-fast: 120ms ease;
+  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
