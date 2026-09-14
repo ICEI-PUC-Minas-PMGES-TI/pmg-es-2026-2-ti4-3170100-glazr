@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, type SyntheticEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 
 import { useAuth } from '../hooks/use-auth'
 import { getAuthenticationConfiguration, startGoogle } from '../api/auth-api'
@@ -9,13 +10,14 @@ export function LoginForm() {
   const { clearError, error, isSubmitting, login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [googleEnabled, setGoogleEnabled] = useState(false)
 
   useEffect(() => {
     void getAuthenticationConfiguration().then((config) => setGoogleEnabled(config.googleEnabled)).catch(() => undefined)
   }, [])
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
     await login({ email: email.trim(), password })
     setPassword('')
@@ -51,21 +53,33 @@ export function LoginForm() {
 
         <div className="form-field">
           <label htmlFor="password">Senha</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            maxLength={128}
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value)
-              clearError()
-            }}
-            placeholder="Digite sua senha"
-            disabled={isSubmitting}
-          />
+          <div className="password-field">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              required
+              maxLength={128}
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value)
+                clearError()
+              }}
+              placeholder="Digite sua senha"
+              disabled={isSubmitting}
+            />
+            <button
+              className="password-field__toggle"
+              type="button"
+              onClick={() => setShowPassword((current) => !current)}
+              disabled={isSubmitting}
+              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              aria-pressed={showPassword}
+            >
+              {showPassword ? <EyeOff aria-hidden="true" size={18} /> : <Eye aria-hidden="true" size={18} />}
+            </button>
+          </div>
         </div>
 
         <div className="login-form__feedback" aria-live="polite">
