@@ -103,9 +103,9 @@ class BackendIntegrationTest {
                 where access_profile_id = '00000000-0000-0000-0000-000000000001'
                 """, Integer.class);
 
-        assertThat(migrations).isEqualTo(6);
-        assertThat(permissions).isEqualTo(14);
-        assertThat(adminPermissions).isEqualTo(14);
+        assertThat(migrations).isEqualTo(8);
+        assertThat(permissions).isEqualTo(18);
+        assertThat(adminPermissions).isEqualTo(18);
     }
 
     @Test
@@ -161,7 +161,7 @@ class BackendIntegrationTest {
         mvc.perform(get("/api/v1/auth/me").cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(ADMIN_EMAIL))
-                .andExpect(jsonPath("$.permissions.length()").value(14));
+                .andExpect(jsonPath("$.permissions.length()").value(18));
         assertThat(jdbc.queryForObject("select count(*) from spring_session", Integer.class)).isPositive();
 
         mvc.perform(post("/api/v1/auth/logout").cookie(session).with(csrf()))
@@ -422,6 +422,45 @@ class BackendIntegrationTest {
         mvc.perform(get("/api/v1/kits/{id}", kitId).cookie(adminSession))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+    }
+
+    @Test
+    void administratorCreatesAndManagesGlasses() throws Exception {
+        Cookie adminSession = login(ADMIN_EMAIL, ADMIN_PASSWORD);
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+
+        MvcResult created = mvc.perform(post("/api/v1/glasses")
+                        .cookie(adminSession).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"Vidro Teste %s","thicknessMm":8.00,"finish":"Lapidado","color":"Incolor","pricePerSquareMeter":175.50}
+                                """.formatted(suffix)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Vidro Teste " + suffix))
+                .andExpect(jsonPath("$.thicknessMm").value(8.0))
+                .andExpect(jsonPath("$.active").value(true))
+                .andReturn();
+        JsonNode glass = objectMapper.readTree(created.getResponse().getContentAsByteArray());
+        UUID glassId = UUID.fromString(glass.get("id").asText());
+
+        mvc.perform(post("/api/v1/glasses")
+                        .cookie(adminSession).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"Vidro Teste %s","thicknessMm":8.00,"finish":"Lapidado","color":"Incolor","pricePerSquareMeter":200.00}
+                                """.formatted(suffix)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("DUPLICATE_GLASS"));
+
+        mvc.perform(patch("/api/v1/glasses/{id}/status", glassId)
+                        .cookie(adminSession).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"active\":false}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.active").value(false));
+
+        mvc.perform(delete("/api/v1/glasses/{id}", glassId).cookie(adminSession).with(csrf()))
+                .andExpect(status().isNoContent());
     }
 
     private Cookie login(String email, String password) throws Exception {
