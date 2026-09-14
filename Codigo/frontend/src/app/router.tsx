@@ -9,6 +9,8 @@ import { ResetPasswordPage } from '../pages/ResetPasswordPage'
 import { AccountSecurityPage } from '../pages/AccountSecurityPage'
 import { AdminUsersPage } from '../pages/AdminUsersPage'
 import { NewAdminUserPage } from '../pages/NewAdminUserPage'
+import { AdminKitsPage } from '../pages/AdminKitsPage'
+import { NewAdminKitPage } from '../pages/NewAdminKitPage'
 import { ProtectedRoute } from './ProtectedRoute'
 import { PublicOnlyRoute } from './PublicOnlyRoute'
 
@@ -29,6 +31,8 @@ export function AppRoutes() {
         <Route path="/account/security" element={<AccountSecurityPage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
         <Route path="/admin/users/new" element={<NewAdminUserPage />} />
+        <Route path="/admin/kits" element={<AdminKitsPage />} />
+        <Route path="/admin/kits/new" element={<NewAdminKitPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
