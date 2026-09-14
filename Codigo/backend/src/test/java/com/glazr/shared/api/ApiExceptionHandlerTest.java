@@ -36,6 +36,7 @@ class ApiExceptionHandlerTest {
     @CsvSource({
             "uk_users_email_ci,DUPLICATE_EMAIL",
             "uk_access_profiles_name_ci,DUPLICATE_ACCESS_PROFILE",
+            "uk_kits_name_ci,DUPLICATE_KIT",
             "fk_user_access_profiles_profile,ACCESS_PROFILE_IN_USE",
             "some_other_constraint,DATA_CONFLICT"
     })

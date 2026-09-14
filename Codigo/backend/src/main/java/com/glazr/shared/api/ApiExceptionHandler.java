@@ -87,6 +87,9 @@ public class ApiExceptionHandler {
         if (constraint.contains("uk_access_profiles_name_ci")) {
             return problem(HttpStatus.CONFLICT, "DUPLICATE_ACCESS_PROFILE", "Já existe um perfil com este nome", request);
         }
+        if (constraint.contains("uk_kits_name_ci")) {
+            return problem(HttpStatus.CONFLICT, "DUPLICATE_KIT", "Já existe um kit com este nome", request);
+        }
         if (constraint.contains("fk_user_access_profiles_profile")
                 && "DELETE".equalsIgnoreCase(request.getMethod())) {
             return problem(HttpStatus.CONFLICT, "ACCESS_PROFILE_IN_USE", "O perfil está associado a usuários", request);
