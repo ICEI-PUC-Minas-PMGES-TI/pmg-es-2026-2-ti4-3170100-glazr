@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useInView, type Variants } from 'framer-motion'
-import { FileText, Users, BarChart2, Package, MessageSquare } from 'lucide-react'
+import { FileText, Users, BarChart2, Package, MessageSquare, Layers } from 'lucide-react'
 import './LandingPage.css'
 
 // ── Animation helpers ──────────────────────────────────────────
@@ -43,7 +43,7 @@ const features: { icon: React.ReactNode; title: string; desc: string }[] = [
     desc: 'Cadastre tipos de vidro por m², crie kits completos e vincule cores a cada produto.',
   },
   {
-    icon: null,
+    icon: <Layers size={22} strokeWidth={1.8} />,
     title: 'Controle de estoque',
     desc: 'Baixa automática ao confirmar venda, alertas de estoque mínimo e cálculo de aproveitamento de chapa.',
   },
