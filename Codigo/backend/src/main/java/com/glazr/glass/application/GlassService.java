@@ -5,6 +5,7 @@ import com.glazr.glass.api.GlassResponse;
 import com.glazr.glass.api.UpdateGlassRequest;
 import com.glazr.glass.infrastructure.GlassEntity;
 import com.glazr.glass.infrastructure.GlassRepository;
+import com.glazr.inventory.infrastructure.GlassSheetRepository;
 import com.glazr.shared.exception.ConflictException;
 import com.glazr.shared.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
@@ -21,10 +22,12 @@ import java.util.UUID;
 public class GlassService {
 
     private final GlassRepository glasses;
+    private final GlassSheetRepository sheets;
     private final Clock clock;
 
-    public GlassService(GlassRepository glasses, Clock clock) {
+    public GlassService(GlassRepository glasses, GlassSheetRepository sheets, Clock clock) {
         this.glasses = glasses;
+        this.sheets = sheets;
         this.clock = clock;
     }
 
@@ -86,6 +89,9 @@ public class GlassService {
     @Transactional
     public void delete(UUID id) {
         GlassEntity glass = requireGlass(id);
+        if (sheets.existsByGlassId(id)) {
+            throw new ConflictException("GLASS_HAS_STOCK_HISTORY", "Não é possível excluir um vidro com histórico de estoque");
+        }
         glasses.delete(glass);
         glasses.flush();
     }

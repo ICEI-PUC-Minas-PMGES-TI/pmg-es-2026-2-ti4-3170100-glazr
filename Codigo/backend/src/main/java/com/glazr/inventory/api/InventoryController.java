@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import com.glazr.authentication.infrastructure.GlazrUserPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.List;
 import java.util.UUID;
@@ -54,5 +58,13 @@ public class InventoryController {
             @PathVariable UUID glassId,
             @Valid @RequestBody UpdateStockMinimumRequest request) {
         return service.updateMinimum(glassId, request.minimumAreaM2());
+    }
+
+    @PostMapping("/{glassId}/receipts")
+    public List<GlassSheetResponse> receive(
+            @PathVariable UUID glassId,
+            @Valid @RequestBody ReceiveSheetsRequest request,
+            @AuthenticationPrincipal GlazrUserPrincipal principal) {
+        return service.receive(glassId, request, principal.user().id());
     }
 }

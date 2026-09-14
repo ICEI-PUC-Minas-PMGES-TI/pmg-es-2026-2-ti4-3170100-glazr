@@ -5,6 +5,7 @@ import com.glazr.glass.api.GlassResponse;
 import com.glazr.glass.api.UpdateGlassRequest;
 import com.glazr.glass.infrastructure.GlassEntity;
 import com.glazr.glass.infrastructure.GlassRepository;
+import com.glazr.inventory.infrastructure.GlassSheetRepository;
 import com.glazr.shared.exception.ConflictException;
 import com.glazr.shared.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -20,12 +21,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 class GlassServiceTest {
 
     private final GlassRepository glasses = mock(GlassRepository.class);
-    private final GlassService service = new GlassService(glasses, Clock.systemUTC());
+    private final GlassSheetRepository sheets = mock(GlassSheetRepository.class);
+    private final GlassService service = new GlassService(glasses, sheets, Clock.systemUTC());
 
     @Test
     void rejectsDuplicateCompositeAttributes() {
@@ -97,5 +100,21 @@ class GlassServiceTest {
 
         assertThatThrownBy(() -> service.update(unknownId, request))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void preventsDeletingGlassWithStockHistory() {
+        GlassEntity glass = GlassEntity.create(
+                "Vidro Temperado", new BigDecimal("8.00"), "Lapidado", "Incolor",
+                new BigDecimal("150.00"), Clock.systemUTC().instant());
+        when(glasses.findById(glass.getId())).thenReturn(Optional.of(glass));
+        when(sheets.existsByGlassId(glass.getId())).thenReturn(true);
+
+        assertThatThrownBy(() -> service.delete(glass.getId()))
+                .isInstanceOf(ConflictException.class)
+                .extracting("code")
+                .isEqualTo("GLASS_HAS_STOCK_HISTORY");
+
+        verify(glasses, never()).delete(any(GlassEntity.class));
     }
 }

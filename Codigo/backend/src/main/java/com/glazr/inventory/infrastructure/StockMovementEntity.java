@@ -56,6 +56,57 @@ public class StockMovementEntity {
     protected StockMovementEntity() {
     }
 
+    public static StockMovementEntity receipt(GlassSheetEntity sheet, String notes, UUID performedByUserId, Instant now) {
+        return create(
+                sheet.getId(), StockMovementType.RECEIPT, null, sheet.getRemainingAreaM2(),
+                null, null, null, null, notes, performedByUserId, now
+        );
+    }
+
+    public static StockMovementEntity adjustment(GlassSheetEntity sheet, BigDecimal previousRemainingAreaM2,
+                                                 String notes, UUID performedByUserId, Instant now) {
+        return create(
+                sheet.getId(), StockMovementType.ADJUSTMENT, previousRemainingAreaM2, sheet.getRemainingAreaM2(),
+                null, null, null, null, notes, performedByUserId, now
+        );
+    }
+
+    public static StockMovementEntity manualCut(GlassSheetEntity sheet, BigDecimal previousRemainingAreaM2,
+                                                BigDecimal pieceWidthMm, BigDecimal pieceHeightMm, BigDecimal pieceAreaM2,
+                                                BigDecimal lossAreaM2, String notes, UUID performedByUserId, Instant now) {
+        return create(
+                sheet.getId(), StockMovementType.MANUAL_CUT, previousRemainingAreaM2, sheet.getRemainingAreaM2(),
+                pieceWidthMm, pieceHeightMm, pieceAreaM2, lossAreaM2, notes, performedByUserId, now
+        );
+    }
+
+    private static StockMovementEntity create(UUID glassSheetId, StockMovementType movementType,
+                                              BigDecimal previousRemainingAreaM2, BigDecimal resultingRemainingAreaM2,
+                                              BigDecimal pieceWidthMm, BigDecimal pieceHeightMm, BigDecimal pieceAreaM2,
+                                              BigDecimal lossAreaM2, String notes, UUID performedByUserId, Instant now) {
+        StockMovementEntity movement = new StockMovementEntity();
+        movement.id = UUID.randomUUID();
+        movement.glassSheetId = glassSheetId;
+        movement.movementType = movementType;
+        movement.previousRemainingAreaM2 = previousRemainingAreaM2;
+        movement.resultingRemainingAreaM2 = resultingRemainingAreaM2;
+        movement.pieceWidthMm = pieceWidthMm;
+        movement.pieceHeightMm = pieceHeightMm;
+        movement.pieceAreaM2 = pieceAreaM2;
+        movement.lossAreaM2 = lossAreaM2;
+        movement.notes = normalizeNotes(notes);
+        movement.performedByUserId = performedByUserId;
+        movement.createdAt = now;
+        return movement;
+    }
+
+    private static String normalizeNotes(String value) {
+        if (value == null || value.isBlank()) return null;
+        String normalized = value.strip();
+        if (normalized.length() > 300) throw new IllegalArgumentException("Observação deve ter no máximo 300 caracteres");
+        return normalized;
+    }
+
     public UUID getId() { return id; }
     public UUID getGlassSheetId() { return glassSheetId; }
     public StockMovementType getMovementType() { return movementType; }
