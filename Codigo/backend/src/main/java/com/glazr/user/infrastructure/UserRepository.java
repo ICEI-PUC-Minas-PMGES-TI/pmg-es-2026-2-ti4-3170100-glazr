@@ -20,7 +20,7 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
     @Query("""
             select distinct u from UserEntity u
-            where (:query is null or lower(u.email) like lower(concat('%', :query, '%'))
+            where (:query = '' or lower(u.email) like lower(concat('%', :query, '%'))
                 or lower(u.displayName) like lower(concat('%', :query, '%')))
               and (:active is null or u.active = :active)
             """)

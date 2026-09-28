@@ -91,7 +91,7 @@ public class UserManagementService {
     @PreAuthorize("hasAuthority('USER_READ')")
     @Transactional(readOnly = true)
     public Page<UserResponse> list(String query, Boolean active, Pageable pageable) {
-        String normalizedQuery = query == null || query.isBlank() ? null : query.strip();
+        String normalizedQuery = query == null || query.isBlank() ? "" : query.strip();
         return users.search(normalizedQuery, active, pageable).map(this::toResponse);
     }
 

@@ -41,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -333,6 +334,18 @@ class BackendIntegrationTest {
         mvc.perform(get("/api/v1/auth/me").cookie(operatorSession))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+    }
+
+    @Test
+    void administratorListsUsersWithoutOptionalFilters() throws Exception {
+        Cookie adminSession = login(ADMIN_EMAIL, ADMIN_PASSWORD);
+
+        mvc.perform(get("/api/v1/users")
+                        .cookie(adminSession)
+                        .param("size", "100")
+                        .param("sort", "displayName,asc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*].email").value(hasItem(ADMIN_EMAIL)));
     }
 
     @Test
