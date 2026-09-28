@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="O4qPtULo_sorCUZrlTD6">
+    <mxGraphModel dx="1369" dy="757" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="K4l9J12Tvqqt3IjxK-tw-1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Admin" vertex="1">
+          <mxGeometry height="60" width="30" x="90" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="K4l9J12Tvqqt3IjxK-tw-13" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Usuário / Atendente" vertex="1">
+          <mxGeometry height="60" width="30" x="90" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="whatsapp_actor" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;whiteSpace=wrap;" value="API WhatsApp" vertex="1">
+          <mxGeometry height="60" width="30" x="720" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="K4l9J12Tvqqt3IjxK-tw-21" edge="1" parent="1" source="K4l9J12Tvqqt3IjxK-tw-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;" target="K4l9J12Tvqqt3IjxK-tw-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="K4l9J12Tvqqt3IjxK-tw-4" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Sistema Vidraçaria Hudson (Glazr)" vertex="1">
+          <mxGeometry height="780" width="480" x="190" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="K4l9J12Tvqqt3IjxK-tw-5" parent="K4l9J12Tvqqt3IjxK-tw-4" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Gerenciar Usuários / Funcionários" vertex="1">
+          <mxGeometry height="40" width="170" x="30" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="K4l9J12Tvqqt3IjxK-tw-6" parent="K4l9J12Tvqqt3IjxK-tw-4" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Definir Perfis e Permissões" vertex="1">
+          <mxGeometry height="40" width="170" x="30" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="K4l9J12Tvqqt3IjxK-tw-7" parent="K4l9J12Tvqqt3IjxK-tw-4" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Ver Auditoria (Logs)" vertex="1">
+          <mxGeometry height="40" width="170" x="30" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_dashboard" parent="K4l9J12Tvqqt3IjxK-tw-4" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Visualizar Dashboard de Vendas" vertex="1">
+          <mxGeometry height="45" width="180" x="30" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_vidros" parent="K4l9J12Tvqqt3IjxK-tw-4" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Cadastrar Tipos de Vidro e Preços (m²)" vertex="1">
+          <mxGeometry height="45" width="200" x="30" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_kits" parent="K4l9J12Tvqqt3IjxK-tw-4" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Cadastrar Kits e Itens" vertex="1">
+          <mxGeometry height="45" width="180" x="30" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_cores" parent="K4l9J12Tvqqt3IjxK-tw-4" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Cadastrar Cores (Vidros e Kits)" vertex="1">
+          <mxGeometry height="45" width="190" x="30" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_fornecedores" parent="K4l9J12Tvqqt3IjxK-tw-4" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Cadastrar Fornecedores" vertex="1">
+          <mxGeometry height="45" width="180" x="30" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_orcamento" parent="K4l9J12Tvqqt3IjxK-tw-4" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Gerar Orçamento de Vidros" vertex="1">
+          <mxGeometry height="45" width="180" x="30" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_confirmar_venda" parent="K4l9J12Tvqqt3IjxK-tw-4" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Confirmar Venda" vertex="1">
+          <mxGeometry height="45" width="160" x="35" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_whatsapp" parent="K4l9J12Tvqqt3IjxK-tw-4" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Enviar Pedido via WhatsApp" vertex="1">
+          <mxGeometry height="45" width="180" x="270" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_include_whatsapp" edge="1" parent="K4l9J12Tvqqt3IjxK-tw-4" source="uc_confirmar_venda" style="dashed=1;endArrow=open;endSize=12;html=1;verticalAlign=bottom;labelBackgroundColor=none;" target="uc_whatsapp" value="&amp;lt;extends&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_admin_1" edge="1" parent="1" source="K4l9J12Tvqqt3IjxK-tw-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="K4l9J12Tvqqt3IjxK-tw-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="150" y="150" />
+              <mxPoint x="150" y="90" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_admin_2" edge="1" parent="1" source="K4l9J12Tvqqt3IjxK-tw-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="K4l9J12Tvqqt3IjxK-tw-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_admin_3" edge="1" parent="1" source="K4l9J12Tvqqt3IjxK-tw-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="K4l9J12Tvqqt3IjxK-tw-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_admin_4" edge="1" parent="1" source="K4l9J12Tvqqt3IjxK-tw-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="uc_dashboard">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="150" y="150" />
+              <mxPoint x="150" y="242.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_user_vidros" edge="1" parent="1" source="K4l9J12Tvqqt3IjxK-tw-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="uc_vidros">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="480" />
+              <mxPoint x="170" y="302.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_user_kits" edge="1" parent="1" source="K4l9J12Tvqqt3IjxK-tw-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="uc_kits">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="480" />
+              <mxPoint x="170" y="362.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_user_cores" edge="1" parent="1" source="K4l9J12Tvqqt3IjxK-tw-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="uc_cores">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_user_fornecedores" edge="1" parent="1" source="K4l9J12Tvqqt3IjxK-tw-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="uc_fornecedores">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_user_orcamento" edge="1" parent="1" source="K4l9J12Tvqqt3IjxK-tw-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="uc_orcamento">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="480" />
+              <mxPoint x="170" y="572.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_user_venda" edge="1" parent="1" source="K4l9J12Tvqqt3IjxK-tw-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="uc_confirmar_venda">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="480" />
+              <mxPoint x="170" y="642.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_whatsapp_api" edge="1" parent="1" source="uc_whatsapp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="whatsapp_actor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
