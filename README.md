@@ -1,6 +1,7 @@
 # Glazr
 
-[Escreva um ou dois  parágrafo resumindo o objetivo do seu projeto.]
+O **Glazr** é um sistema web integrado para gestão de vidraçarias, projetado para otimizar e automatizar o controle operacional e comercial do negócio. A plataforma centraliza o catálogo de produtos e acabamentos de vidros, gestão de estoque e chapas, controle de perfis e acessos (Administradores e Vendedores), cálculo de orçamentos e acompanhamento de pedidos de forma ágil, intuitiva e segura.
+
 
 ## Alunos integrantes da equipe
 
