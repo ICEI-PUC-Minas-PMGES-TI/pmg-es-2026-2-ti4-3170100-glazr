@@ -144,6 +144,14 @@ public class InventoryService {
         return ManualCutResponse.from(sheet, movement, yieldPercent(pieceAreaM2, lossAreaM2));
     }
 
+    private GlassEntity requireGlass(UUID id) {
+        return glasses.findById(id).orElseThrow(() -> new ResourceNotFoundException("Vidro"));
+    }
+
+    private GlassSheetEntity requireSheetForUpdate(UUID sheetId) {
+        return sheets.findByIdForUpdate(sheetId).orElseThrow(() -> new ResourceNotFoundException("Chapa"));
+    }
+
     private GlassStockSummaryResponse summaryFor(GlassEntity glass) {
         BigDecimal availableAreaM2 = normalizeArea(sheets.sumRemainingAreaByGlassId(glass.getId()));
         BigDecimal minimumAreaM2 = settings.findById(glass.getId())
@@ -153,13 +161,13 @@ public class InventoryService {
                 statusFor(availableAreaM2, minimumAreaM2));
     }
 
+    private BigDecimal normalizeArea(BigDecimal area) {
+        return area == null ? ZERO : area;
+    }
+
     private StockStatus statusFor(BigDecimal availableAreaM2, BigDecimal minimumAreaM2) {
         if (minimumAreaM2 == null) return StockStatus.UNCONFIGURED;
         return availableAreaM2.compareTo(minimumAreaM2) <= 0 ? StockStatus.LOW : StockStatus.OK;
-    }
-
-    private BigDecimal normalizeArea(BigDecimal area) {
-        return area == null ? ZERO : area;
     }
 
     private BigDecimal yieldPercent(BigDecimal pieceAreaM2, BigDecimal lossAreaM2) {
@@ -167,13 +175,5 @@ public class InventoryService {
         return processedAreaM2.signum() == 0 ? ZERO : pieceAreaM2
                 .multiply(ONE_HUNDRED)
                 .divide(processedAreaM2, 2, RoundingMode.HALF_UP);
-    }
-
-    private GlassSheetEntity requireSheetForUpdate(UUID sheetId) {
-        return sheets.findByIdForUpdate(sheetId).orElseThrow(() -> new ResourceNotFoundException("Chapa"));
-    }
-
-    private GlassEntity requireGlass(UUID id) {
-        return glasses.findById(id).orElseThrow(() -> new ResourceNotFoundException("Vidro"));
     }
 }
