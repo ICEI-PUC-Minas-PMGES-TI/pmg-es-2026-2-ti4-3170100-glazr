@@ -211,6 +211,7 @@ export function NewAdminKitPage() {
                 onClick={() =>
                   setComponents((current) => [...current, emptyComponent()])
                 }
+                style={{ width: "100%" }}
               >
                 Adicionar componente
               </button>
