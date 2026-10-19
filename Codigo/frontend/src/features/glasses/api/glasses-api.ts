@@ -1,5 +1,6 @@
 import { csrfRequest } from '../../../shared/api/csrf-client'
 import { requestJson } from '../../../shared/api/http-client'
+import type { Page } from '../../../shared/api/page'
 
 export interface GlassSummary {
   id: string
@@ -21,18 +22,7 @@ export interface CreateGlassPayload {
   pricePerSquareMeter: number
 }
 
-export interface UpdateGlassPayload {
-  name: string
-  thicknessMm: number
-  finish: string
-  color: string
-  pricePerSquareMeter: number
-}
-
-interface Page<T> {
-  content: T[]
-  totalElements?: number
-}
+export type UpdateGlassPayload = CreateGlassPayload
 
 export const listGlasses = (params?: {
   query?: string

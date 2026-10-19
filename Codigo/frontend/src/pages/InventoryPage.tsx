@@ -4,13 +4,9 @@ import { AlertTriangle, ArrowRight, Search } from 'lucide-react'
 import { useAuth } from '../features/auth/hooks/use-auth'
 import { listInventory, type GlassStockSummary, type StockStatus } from '../features/inventory/api/inventory-api'
 import { AppShell } from '../shared/components/AppShell'
+import { areaFormatter } from '../shared/format/formatters'
 import './WorkflowPages.css'
 import './InventoryPages.css'
-
-const areaFormatter = new Intl.NumberFormat('pt-BR', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-})
 
 const statusLabels: Readonly<Record<StockStatus, string>> = {
   OK: 'Regular',

@@ -9,6 +9,7 @@ import {
   type GlassSummary,
 } from '../features/glasses/api/glasses-api'
 import { AppShell } from '../shared/components/AppShell'
+import { currencyFormatter } from '../shared/format/formatters'
 import './WorkflowPages.css'
 
 const FINISH_OPTIONS = [
@@ -20,11 +21,6 @@ const FINISH_OPTIONS = [
 ]
 
 const THICKNESS_OPTIONS = [3, 4, 5, 6, 8, 10, 12, 15, 19]
-
-const currencyFormatter = new Intl.NumberFormat('pt-BR', {
-  style: 'currency',
-  currency: 'BRL',
-})
 
 export function GlassesPage() {
   const { user } = useAuth()

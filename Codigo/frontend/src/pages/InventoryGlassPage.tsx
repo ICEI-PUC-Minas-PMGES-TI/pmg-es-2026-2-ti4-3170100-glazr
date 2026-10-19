@@ -17,10 +17,10 @@ import {
 } from '../features/inventory/api/inventory-api'
 import { ApiError } from '../shared/api/api-error'
 import { AppShell } from '../shared/components/AppShell'
+import { areaFormatter } from '../shared/format/formatters'
 import './WorkflowPages.css'
 import './InventoryPages.css'
 
-const areaFormatter = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const dateFormatter = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
 
 function statusLabel(status: StockStatus): string {

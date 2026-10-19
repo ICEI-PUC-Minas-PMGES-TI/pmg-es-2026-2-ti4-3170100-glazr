@@ -1,5 +1,6 @@
 import { csrfRequest } from '../../../shared/api/csrf-client'
 import { requestJson } from '../../../shared/api/http-client'
+import type { Page } from '../../../shared/api/page'
 
 export interface UserSummary {
   id: string
@@ -18,11 +19,6 @@ export interface AccessProfile {
   id: string
   name: string
   active: boolean
-}
-
-interface Page<T> {
-  content: T[]
-  totalElements?: number
 }
 
 export const listUsers = (params?: { query?: string; active?: boolean }) => {

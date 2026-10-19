@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../features/auth/hooks/use-auth'
 import { deleteKit, listKits, type KitSummary } from '../features/kits/api/kits-api'
 import { AppShell } from '../shared/components/AppShell'
+import { currencyFormatter } from '../shared/format/formatters'
 import './WorkflowPages.css'
-
-const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
 
 export function AdminKitsPage() {
   const { user } = useAuth()
@@ -91,7 +90,7 @@ export function AdminKitsPage() {
                     <br />
                     <span className="badge">{kit.color}</span>
                   </td>
-                  <td>{currency.format(kit.price)}</td>
+                  <td>{currencyFormatter.format(kit.price)}</td>
                   <td>
                     {kit.components.map((component, index) => (
                       <span className="badge" key={index}>

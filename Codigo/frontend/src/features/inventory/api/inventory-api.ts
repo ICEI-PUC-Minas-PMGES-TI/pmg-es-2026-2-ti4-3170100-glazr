@@ -1,5 +1,6 @@
 import { csrfRequest } from '../../../shared/api/csrf-client'
 import { requestJson } from '../../../shared/api/http-client'
+import type { Page } from '../../../shared/api/page'
 
 export type StockStatus = 'OK' | 'LOW' | 'UNCONFIGURED'
 export type SheetStatus = 'AVAILABLE' | 'DEPLETED'
@@ -48,10 +49,6 @@ export interface ManualCutResult {
   readonly sheet: GlassSheet
   readonly movement: StockMovement
   readonly yieldPercent: number
-}
-
-interface Page<T> {
-  readonly content: ReadonlyArray<T>
 }
 
 export interface ReceiveSheetsPayload {
