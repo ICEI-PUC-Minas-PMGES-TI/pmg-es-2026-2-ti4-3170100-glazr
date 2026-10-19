@@ -17,6 +17,7 @@ import { NewGlassPage } from '../pages/NewGlassPage'
 import { EditGlassPage } from '../pages/EditGlassPage'
 import { InventoryPage } from '../pages/InventoryPage'
 import { InventoryGlassPage } from '../pages/InventoryGlassPage'
+import { AnalyticsPage } from '../pages/AnalyticsPage'
 import { ProtectedRoute } from './ProtectedRoute'
 import { PublicOnlyRoute } from './PublicOnlyRoute'
 
@@ -45,6 +46,7 @@ export function AppRoutes() {
         <Route path="/glasses/:id/edit" element={<EditGlassPage />} />
         <Route path="/inventory" element={<InventoryPage />} />
         <Route path="/inventory/glasses/:id" element={<InventoryGlassPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
