@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Search, UserPlus } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { MailX, Pencil, Search, Send, UserCheck, UserPlus, UserX } from 'lucide-react'
 import { useAuth } from '../features/auth/hooks/use-auth'
 import {
   listUsers,
@@ -9,11 +9,13 @@ import {
   updateUserStatus,
   type UserSummary,
 } from '../features/users/api/users-api'
+import { ActionsMenu, type ActionsMenuItem } from '../shared/components/ActionsMenu'
 import { AppShell } from '../shared/components/AppShell'
 import './WorkflowPages.css'
 
 export function AdminUsersPage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [users, setUsers] = useState<UserSummary[]>([])
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -80,6 +82,49 @@ export function AdminUsersPage() {
       return true
     })
   }, [users, search, statusFilter, profileFilter])
+
+  function actionsFor(item: UserSummary): ActionsMenuItem[] {
+    const permissions = user?.permissions ?? []
+    const actions: ActionsMenuItem[] = []
+    if (permissions.includes('USER_UPDATE')) {
+      actions.push({
+        label: 'Editar',
+        icon: <Pencil size={16} aria-hidden="true" />,
+        onSelect: () => void navigate(`/admin/users/${item.id}/edit`),
+      })
+      if (!item.authenticationMethods.length) {
+        actions.push(
+          {
+            label: 'Reenviar convite',
+            icon: <Send size={16} aria-hidden="true" />,
+            onSelect: () =>
+              void act(item.id, () => resendInvitation(item.id), `Convite reenviado para ${item.email}.`),
+          },
+          {
+            label: 'Revogar convite',
+            icon: <MailX size={16} aria-hidden="true" />,
+            tone: 'danger',
+            onSelect: () =>
+              void act(item.id, () => revokeInvitation(item.id), `Convite de ${item.displayName} revogado.`),
+          },
+        )
+      }
+    }
+    if (permissions.includes('USER_STATUS_UPDATE')) {
+      actions.push({
+        label: item.active ? 'Inativar' : 'Ativar',
+        icon: item.active ? <UserX size={16} aria-hidden="true" /> : <UserCheck size={16} aria-hidden="true" />,
+        tone: item.active ? 'danger' : 'default',
+        onSelect: () =>
+          void act(
+            item.id,
+            () => updateUserStatus(item.id, !item.active),
+            `Status de ${item.displayName} atualizado para ${!item.active ? 'Ativo' : 'Inativo'}.`,
+          ),
+      })
+    }
+    return actions
+  }
 
   // Contadores
   const totalCount = users.length
@@ -248,67 +293,11 @@ export function AdminUsersPage() {
                     )}
                   </td>
                   <td>
-                    <div className="workflow-actions" style={{ justifyContent: 'flex-start' }}>
-                      {user.permissions.includes('USER_UPDATE') ? (
-                        <Link
-                          className="button button--secondary"
-                          to={`/admin/users/${item.id}/edit`}
-                          style={{ minHeight: '2.3rem', padding: '0.4rem 0.8rem', fontSize: '0.82rem' }}
-                        >
-                          Editar
-                        </Link>
-                      ) : null}
-
-                      {user.permissions.includes('USER_UPDATE') && !item.authenticationMethods.length ? (
-                        <>
-                          <button
-                            className="button button--secondary"
-                            disabled={busy === item.id}
-                            onClick={() =>
-                              void act(
-                                item.id,
-                                () => resendInvitation(item.id),
-                                `Convite reenviado para ${item.email}.`,
-                              )
-                            }
-                            style={{ minHeight: '2.3rem', padding: '0.4rem 0.8rem', fontSize: '0.82rem' }}
-                          >
-                            Reenviar
-                          </button>
-                          <button
-                            className="button button--secondary"
-                            disabled={busy === item.id}
-                            onClick={() =>
-                              void act(
-                                item.id,
-                                () => revokeInvitation(item.id),
-                                `Convite de ${item.displayName} revogado.`,
-                              )
-                            }
-                            style={{ minHeight: '2.3rem', padding: '0.4rem 0.8rem', fontSize: '0.82rem' }}
-                          >
-                            Revogar
-                          </button>
-                        </>
-                      ) : null}
-
-                      {user.permissions.includes('USER_STATUS_UPDATE') ? (
-                        <button
-                          className="button button--secondary"
-                          disabled={busy === item.id}
-                          onClick={() =>
-                            void act(
-                              item.id,
-                              () => updateUserStatus(item.id, !item.active),
-                              `Status de ${item.displayName} atualizado para ${!item.active ? 'Ativo' : 'Inativo'}.`,
-                            )
-                          }
-                          style={{ minHeight: '2.3rem', padding: '0.4rem 0.8rem', fontSize: '0.82rem' }}
-                        >
-                          {item.active ? 'Inativar' : 'Ativar'}
-                        </button>
-                      ) : null}
-                    </div>
+                    <ActionsMenu
+                      label={`Ações para ${item.displayName}`}
+                      disabled={busy === item.id}
+                      items={actionsFor(item)}
+                    />
                   </td>
                 </tr>
               ))

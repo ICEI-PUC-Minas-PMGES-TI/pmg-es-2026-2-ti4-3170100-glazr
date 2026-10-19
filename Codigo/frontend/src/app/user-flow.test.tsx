@@ -182,3 +182,48 @@ it('edita dados e trata proteção contra desativação do último administrador
     await screen.findByText('Não é possível inativar ou remover o perfil do último administrador ativo do sistema.'),
   ).toBeInTheDocument()
 })
+
+it('agrupa as ações de cada funcionário em um menu', async () => {
+  let resendCalled = false
+  server.use(
+    http.post('http://localhost/api/v1/users/2f5fb5d7-37ba-4e15-9d72-186da2db78d1/invitation/resend', () => {
+      resendCalled = true
+      return new HttpResponse(null, { status: 204 })
+    }),
+  )
+  window.history.replaceState({}, '', '/admin/users')
+  const user = userEvent.setup()
+  render(<App />)
+
+  await user.click(await screen.findByRole('button', { name: 'Ações para Administrador do Sistema' }))
+  expect(screen.getByRole('menuitem', { name: 'Editar' })).toHaveFocus()
+  expect(screen.getByRole('menuitem', { name: 'Inativar' })).toBeInTheDocument()
+  expect(screen.queryByRole('menuitem', { name: 'Reenviar convite' })).not.toBeInTheDocument()
+
+  await user.keyboard('{Escape}')
+  expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Ações para Administrador do Sistema' })).toHaveFocus()
+
+  await user.click(screen.getByRole('button', { name: 'Ações para Vendedor Exemplo' }))
+  expect(screen.getByRole('menuitem', { name: 'Revogar convite' })).toBeInTheDocument()
+  await user.click(screen.getByRole('menuitem', { name: 'Reenviar convite' }))
+
+  expect(await screen.findByText('Convite reenviado para vendedor@glazr.local.')).toBeInTheDocument()
+  expect(resendCalled).toBe(true)
+  expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+})
+
+it('abre a edição do funcionário pelo menu de ações', async () => {
+  server.use(
+    http.get('http://localhost/api/v1/users/3f5fb5d7-37ba-4e15-9d72-186da2db78d2', () => HttpResponse.json(mockUsers[2])),
+  )
+  window.history.replaceState({}, '', '/admin/users')
+  const user = userEvent.setup()
+  render(<App />)
+
+  await user.click(await screen.findByRole('button', { name: 'Ações para Funcionario Inativo' }))
+  await user.click(screen.getByRole('menuitem', { name: 'Editar' }))
+
+  expect(await screen.findByRole('heading', { name: 'Editar funcionário' })).toBeInTheDocument()
+  expect(window.location.pathname).toBe('/admin/users/3f5fb5d7-37ba-4e15-9d72-186da2db78d2/edit')
+})
