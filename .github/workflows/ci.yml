@@ -8,6 +8,15 @@ permissions:
   contents: read
 
 jobs:
+  login-proxy-tests:
+    name: Proteção de login no Nginx
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Testar limite com HTTP real
+        run: python3 -m unittest discover -s Codigo/infra/nginx/tests -v
+
   backend-tests:
     name: Backend Tests
     runs-on: ubuntu-latest

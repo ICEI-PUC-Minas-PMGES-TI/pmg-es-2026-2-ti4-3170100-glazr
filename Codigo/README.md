@@ -150,6 +150,29 @@ Invoke-RestMethod -Method Post "$base/api/v1/auth/logout" -WebSession $session -
 
 Operações mutáveis sem o header CSRF retornam `403`. Login inválido, conta desconhecida, inativa ou bloqueada usam a mesma resposta genérica.
 
+### Limitação de tentativas de login
+
+O Nginx limita `POST /api/v1/auth/login` por IP de conexão, antes de encaminhar
+ao backend: cinco tentativas iniciais em sequência e reposição de uma tentativa
+a cada 12 segundos (`5r/m`). O excesso recebe `429`, código `LOGIN_RATE_LIMITED`
+e header `Retry-After: 12`. A tela explica a espera e permite tentar novamente.
+Tentativas bloqueadas não chegam ao BCrypt. CSRF, sessão e bloqueio de conta
+por senha incorreta continuam ativos.
+
+Essa proteção depende do ingresso Nginx usado no Compose. Ao executar o backend
+diretamente, use também esse proxy; não exponha a porta do backend na internet.
+O IP vem da conexão, não de `X-Forwarded-For` enviado pelo cliente. Usuários que
+compartilham IP compartilham a cota. Se adicionar outro proxy à frente ou várias
+réplicas do Nginx, revise a identificação de IP confiável e a distribuição da cota.
+
+O teste do proxy inicia containers isolados, verifica bloqueio antes do upstream,
+tentativas de contorno por headers/query string, recuperação da cota e acesso às
+outras rotas. Execute da raiz do repositório, com Docker e Python 3:
+
+```powershell
+python -m unittest discover -s Codigo/infra/nginx/tests -v
+```
+
 ## Executar fora do Docker
 
 Inicie um PostgreSQL compatível e defina `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` e as variáveis de bootstrap. No PowerShell:

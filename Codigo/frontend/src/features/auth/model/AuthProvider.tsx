@@ -14,6 +14,9 @@ function authenticationMessage(error: unknown): string {
   if (error instanceof ApiError) {
     if (error.status === 0) return NETWORK_MESSAGE
     if (error.code === 'AUTHENTICATION_FAILED') return INVALID_CREDENTIALS_MESSAGE
+    if (error.status === 429 && error.code === 'LOGIN_RATE_LIMITED') {
+      return 'Muitas tentativas de acesso. Aguarde 12 segundos e tente novamente.'
+    }
   }
   return UNEXPECTED_MESSAGE
 }

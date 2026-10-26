@@ -24,7 +24,12 @@ const authenticationRequired = {
   timestamp: '2026-08-31T00:00:00Z',
 }
 
-beforeEach(() => window.history.replaceState({}, '', '/'))
+beforeEach(() => {
+  window.history.replaceState({}, '', '/')
+  server.use(http.get('http://localhost/api/v1/auth/config', () =>
+    HttpResponse.json({ googleEnabled: false }),
+  ))
+})
 
 it('entra com sessão e CSRF válidos', async () => {
   window.history.replaceState({}, '', '/login')
@@ -120,6 +125,44 @@ it('mostra erro genérico e limpa a senha quando as credenciais são inválidas'
 
   expect(await screen.findByRole('alert')).toHaveTextContent('E-mail ou senha inválidos.')
   expect(password).toHaveValue('')
+})
+
+it('explica o limite de tentativas e permite entrar após a liberação', async () => {
+  window.history.replaceState({}, '', '/login')
+  let rateLimited = true
+  server.use(
+    http.get('http://localhost/api/v1/auth/me', () =>
+      HttpResponse.json(authenticationRequired, { status: 401 }),
+    ),
+    http.get('http://localhost/api/v1/auth/csrf', () =>
+      HttpResponse.json({ headerName: 'X-XSRF-TOKEN', parameterName: '_csrf', token: 'csrf-token' }),
+    ),
+    http.post('http://localhost/api/v1/auth/login', () =>
+      rateLimited
+        ? HttpResponse.json(
+            { status: 429, code: 'LOGIN_RATE_LIMITED' },
+            { status: 429, headers: { 'Retry-After': '12' } },
+          )
+        : HttpResponse.json(authenticatedUser),
+    ),
+  )
+
+  const user = userEvent.setup()
+  render(<App />)
+  await user.type(await screen.findByLabelText('E-mail'), 'gestor@example.invalid')
+  const password = screen.getByLabelText('Senha')
+  await user.type(password, 'senha-local-segura')
+  await user.click(screen.getByRole('button', { name: 'Entrar' }))
+
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    'Muitas tentativas de acesso. Aguarde 12 segundos e tente novamente.',
+  )
+  expect(password).toHaveValue('')
+  expect(window.location.pathname).toBe('/login')
+  rateLimited = false
+  await user.type(password, 'senha-local-segura')
+  await user.click(screen.getByRole('button', { name: 'Entrar' }))
+  expect(await screen.findByText('Olá, Gestor da Vidraçaria')).toBeInTheDocument()
 })
 
 it('redireciona visitante sem sessão para o login ao acessar rota protegida', async () => {
