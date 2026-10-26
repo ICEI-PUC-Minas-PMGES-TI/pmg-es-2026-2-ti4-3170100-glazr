@@ -349,6 +349,35 @@ class BackendIntegrationTest {
     }
 
     @Test
+    void administratorListsExistingInactiveEmployeeWithProfileAndAuthenticationMethod() throws Exception {
+        Cookie adminSession = login(ADMIN_EMAIL, ADMIN_PASSWORD);
+        String email = "existing-" + UUID.randomUUID() + "@example.invalid";
+        UUID userId = insertUser(email, "$2a$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW");
+        jdbc.update("update users set active = false where id = ?", userId);
+        UUID profileId = jdbc.queryForObject("select id from access_profiles where name = 'VENDEDOR'", UUID.class);
+        jdbc.update("insert into user_access_profiles (user_id, access_profile_id) values (?, ?)", userId, profileId);
+        try {
+            mvc.perform(get("/api/v1/users").cookie(adminSession)
+                            .param("size", "100").param("sort", "displayName,asc"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content[*].email").value(hasItem(email)));
+            mvc.perform(get("/api/v1/users").cookie(adminSession)
+                            .param("size", "100").param("sort", "displayName,asc")
+                            .param("query", email).param("active", "false"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content.length()").value(1))
+                    .andExpect(jsonPath("$.content[0].email").value(email))
+                    .andExpect(jsonPath("$.content[0].active").value(false))
+                    .andExpect(jsonPath("$.content[0].accountType").value("EMPLOYEE"))
+                    .andExpect(jsonPath("$.content[0].authenticationMethods[0]").value("PASSWORD"))
+                    .andExpect(jsonPath("$.content[0].accessProfiles[0].name").value("VENDEDOR"));
+        } finally {
+            jdbc.update("delete from user_access_profiles where user_id = ?", userId);
+            jdbc.update("delete from users where id = ?", userId);
+        }
+    }
+
+    @Test
     void lastActiveAdministratorCannotBeDeactivated() throws Exception {
         Cookie adminSession = login(ADMIN_EMAIL, ADMIN_PASSWORD);
         UUID adminId = jdbc.queryForObject("select id from users where email = ?", UUID.class, ADMIN_EMAIL);

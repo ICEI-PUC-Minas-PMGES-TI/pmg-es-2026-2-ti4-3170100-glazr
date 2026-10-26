@@ -32,6 +32,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -58,6 +59,57 @@ class AuthorizationMatrixIntegrationTest {
 
     private static final String MISSING_ID = "11111111-1111-1111-1111-111111111111";
     private static final String ADMIN_PROFILE_ID = "00000000-0000-0000-0000-000000000001";
+
+    private static final Map<String, ExpectedResponse> EXPECTED_RESPONSES = Map.ofEntries(
+            expected("csrf token", 200),
+            expected("authentication configuration", 200),
+            expected("password login", 401, "AUTHENTICATION_FAILED"),
+            expected("Google login start", 404, "GOOGLE_AUTH_DISABLED"),
+            expected("invitation inspection", 400, "INVITATION_INVALID"),
+            expected("password invitation acceptance", 400, "INVITATION_INVALID"),
+            expected("Google invitation start", 404, "GOOGLE_AUTH_DISABLED"),
+            expected("password reset request", 204),
+            expected("password reset completion", 400, "PASSWORD_RESET_INVALID"),
+            expected("logout", 204),
+            expected("current user", 200),
+            expected("password change", 409, "PASSWORD_CREDENTIAL_NOT_CONFIGURED"),
+            expected("Google account link", 404, "GOOGLE_AUTH_DISABLED"),
+            expected("permission catalog", 200),
+            expected("access profile creation", 201),
+            expected("access profile listing", 200),
+            expected("access profile detail", 404, "RESOURCE_NOT_FOUND"),
+            expected("access profile replacement", 404, "RESOURCE_NOT_FOUND"),
+            expected("access profile deletion", 404, "RESOURCE_NOT_FOUND"),
+            expected("user creation", 201),
+            expected("user listing", 200),
+            expected("user detail", 404, "RESOURCE_NOT_FOUND"),
+            expected("user update without profile assignment", 404, "RESOURCE_NOT_FOUND"),
+            expected("user update with profile assignment", 404, "RESOURCE_NOT_FOUND"),
+            expected("user status update", 404, "RESOURCE_NOT_FOUND"),
+            expected("user invitation detail", 404, "RESOURCE_NOT_FOUND"),
+            expected("user invitation resend", 404, "RESOURCE_NOT_FOUND"),
+            expected("user invitation revocation", 404, "RESOURCE_NOT_FOUND"),
+            expected("kit creation", 201),
+            expected("kit listing", 200),
+            expected("kit detail", 404, "RESOURCE_NOT_FOUND"),
+            expected("kit replacement", 404, "RESOURCE_NOT_FOUND"),
+            expected("kit deletion", 404, "RESOURCE_NOT_FOUND"),
+            expected("glass creation", 201),
+            expected("glass listing", 200),
+            expected("glass detail", 404, "RESOURCE_NOT_FOUND"),
+            expected("glass update", 404, "RESOURCE_NOT_FOUND"),
+            expected("glass status update", 404, "RESOURCE_NOT_FOUND"),
+            expected("glass deletion", 404, "RESOURCE_NOT_FOUND"),
+            expected("inventory listing", 200),
+            expected("inventory alerts", 200),
+            expected("inventory summary", 404, "RESOURCE_NOT_FOUND"),
+            expected("inventory sheet listing", 404, "RESOURCE_NOT_FOUND"),
+            expected("inventory movement listing", 404, "RESOURCE_NOT_FOUND"),
+            expected("inventory minimum update", 404, "RESOURCE_NOT_FOUND"),
+            expected("inventory sheet receipt", 404, "RESOURCE_NOT_FOUND"),
+            expected("inventory sheet adjustment", 404, "RESOURCE_NOT_FOUND"),
+            expected("inventory sheet cut", 404, "RESOURCE_NOT_FOUND")
+    );
 
     private static final List<EndpointCase> ENDPOINTS = List.of(
             publicEndpoint("csrf token", HttpMethod.GET, "/api/v1/auth/csrf", null),
@@ -193,6 +245,7 @@ class AuthorizationMatrixIntegrationTest {
         registry.add("glazr.bootstrap.admin.email", () -> "admin@authorization.glazr");
         registry.add("glazr.bootstrap.admin.password", () -> "frase senha autorização");
         registry.add("glazr.bootstrap.admin.name", () -> "Administrador de Autorização");
+        registry.add("glazr.google-auth-enabled", () -> "false");
     }
 
     @Autowired
@@ -220,6 +273,8 @@ class AuthorizationMatrixIntegrationTest {
                 .collect(Collectors.toSet());
 
         assertThat(catalogued).containsExactlyInAnyOrderElementsOf(registered);
+        assertThat(EXPECTED_RESPONSES.keySet()).containsExactlyInAnyOrderElementsOf(
+                ENDPOINTS.stream().map(EndpointCase::name).toList());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -228,7 +283,7 @@ class AuthorizationMatrixIntegrationTest {
         var result = mockMvc.perform(requestFor(endpoint));
 
         if (endpoint.access() == AccessLevel.PUBLIC) {
-            result.andExpect(this::hasNoSecurityRejection);
+            result.andExpect(expectedResponse(endpoint));
         } else {
             result.andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
@@ -244,7 +299,7 @@ class AuthorizationMatrixIntegrationTest {
             result.andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
         } else {
-            result.andExpect(this::hasNoSecurityRejection);
+            result.andExpect(expectedResponse(endpoint));
         }
     }
 
@@ -252,7 +307,7 @@ class AuthorizationMatrixIntegrationTest {
     @MethodSource("endpoints")
     void callerWithTheExactRequiredAuthoritiesCrossesTheSecurityBoundary(EndpointCase endpoint) throws Exception {
         mockMvc.perform(requestFor(endpoint).with(authenticationFor(endpoint.authorities())))
-                .andExpect(this::hasNoSecurityRejection);
+                .andExpect(expectedResponse(endpoint));
     }
 
     @ParameterizedTest(name = "{0}; missing {1}")
@@ -334,13 +389,32 @@ class AuthorizationMatrixIntegrationTest {
         return UUID.nameUUIDFromBytes(value.getBytes(StandardCharsets.UTF_8));
     }
 
-    private void hasNoSecurityRejection(org.springframework.test.web.servlet.MvcResult result) throws Exception {
-        assertThat(result.getResponse().getContentAsString(StandardCharsets.UTF_8))
-                .as("security response for %s %s", result.getRequest().getMethod(), result.getRequest().getRequestURI())
-                .doesNotContain("\"code\":\"AUTHENTICATION_REQUIRED\"")
-                .doesNotContain("\"code\":\"ACCESS_DENIED\"")
-                .doesNotContain("\"code\":\"INVALID_CSRF_TOKEN\"");
+    private org.springframework.test.web.servlet.ResultMatcher expectedResponse(EndpointCase endpoint) {
+        ExpectedResponse expected = EXPECTED_RESPONSES.get(endpoint.name());
+        assertThat(expected).as("Expected response for %s", endpoint).isNotNull();
+        return result -> {
+            status().is(expected.status()).match(result);
+            if (expected.code() != null) {
+                jsonPath("$.code").value(expected.code()).match(result);
+            } else if (expected.status() != 204) {
+                org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .contentTypeCompatibleWith(MediaType.APPLICATION_JSON).match(result);
+                jsonPath("$.code").doesNotExist().match(result);
+            } else {
+                assertThat(result.getResponse().getContentAsByteArray()).isEmpty();
+            }
+        };
     }
+
+    private static Map.Entry<String, ExpectedResponse> expected(String name, int status) {
+        return expected(name, status, null);
+    }
+
+    private static Map.Entry<String, ExpectedResponse> expected(String name, int status, String code) {
+        return Map.entry(name, new ExpectedResponse(status, code));
+    }
+
+    private record ExpectedResponse(int status, String code) { }
 
     private boolean isGlazrApiController(HandlerMethod handler) {
         return handler.getBeanType().getPackageName().startsWith("com.glazr")
