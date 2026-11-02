@@ -1,31 +1,43 @@
-cff-version: 1.0.1
-message: Please cite this software using these metadata.
-title: 
+cff-version: 1.2.0
+message: "Please cite this software using these metadata."
+type: software
+title: "Glazr"
+abstract: "O Glazr é um sistema web integrado para gestão de vidraçarias, projetado para otimizar e automatizar o controle operacional e comercial do negócio."
+
 authors:
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names:
-  - name-suffix: Professor
-    affiliation: PUC Minas
-    family-names: 
-    given-names: 
-  - name-suffix: Professor
-    affiliation: PUC Minas
-    family-names: 
-    given-names: 
+  - family-names: "Kfuri"
+    given-names: "Caio Alves"
+    affiliation: "PUC Minas"
+  - family-names: "Dias"
+    given-names: "Guilherme Horta"
+    affiliation: "PUC Minas"
+  - family-names: "Heleno"
+    given-names: "João"
+    affiliation: "PUC Minas"
+  - family-names: "Duarte"
+    given-names: "Lucas Batista"
+    affiliation: "PUC Minas"
+  - family-names: "de Souza"
+    given-names: "Murilo Freitas"
+    affiliation: "PUC Minas"
+  - family-names: "Freitas"
+    given-names: "Rafael Abras Lessa"
+    affiliation: "PUC Minas"
+  - family-names: "Nhimi"
+    given-names: "Filipe Torio Lopes Ruas"
+    affiliation: "PUC Minas"
+  - family-names: "Lacerda"
+    given-names: "Lucca Soares de Paiva"
+    affiliation: "PUC Minas"
+
 keywords:
-  - 
-  - 
-repository-code: 
+  - "Vidraçaria"
+  - "Gestão de projetos"
+  - "Orçamentos"
+  - "Sistema de gestão"
+  - "Aplicação web"
+
+repository-code: "https://github.com/ICEI-PUC-Minas-PMGES-TI/pmg-es-2026-2-ti4-3170100-glazr"
 license: CC-BY-4.0
 version: 1.0.0
-date-released: 2022-07-14
+date-released: "2026-11-02"
