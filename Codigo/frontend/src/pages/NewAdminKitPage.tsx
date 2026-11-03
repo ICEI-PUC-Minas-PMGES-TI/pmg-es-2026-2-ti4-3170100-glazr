@@ -1,7 +1,12 @@
-import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../features/auth/hooks/use-auth";
-import { createKit, type KitSummary } from "../features/kits/api/kits-api";
+import {
+  createKit,
+  getKit,
+  updateKit,
+  type KitSummary,
+} from "../features/kits/api/kits-api";
 import { AppShell } from "../shared/components/AppShell";
 import "./WorkflowPages.css";
 
@@ -18,6 +23,16 @@ const emptyComponent = (): ComponentDraft => ({
 });
 
 export function NewAdminKitPage() {
+  return <KitFormPage />;
+}
+
+export function EditAdminKitPage() {
+  const { id } = useParams<{ id: string }>();
+  return <KitFormPage kitId={id} />;
+}
+
+function KitFormPage({ kitId }: { kitId?: string }) {
+  const editing = kitId !== undefined;
   const { user } = useAuth();
   const [name, setName] = useState("");
   const [color, setColor] = useState("");
@@ -28,6 +43,27 @@ export function NewAdminKitPage() {
   const [created, setCreated] = useState<KitSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(editing);
+
+  useEffect(() => {
+    if (!kitId) return;
+    getKit(kitId)
+      .then((kit) => {
+        setName(kit.name);
+        setColor(kit.color);
+        setPrice(String(kit.price));
+        setComponents(
+          kit.components.map((component) => ({
+            name: component.name,
+            quantity: String(component.quantity),
+            notes: component.notes ?? "",
+          })),
+        );
+      })
+      .catch(() => setError("Não foi possível carregar os dados do kit."))
+      .finally(() => setLoading(false));
+  }, [kitId]);
+
   function updateComponent(index: number, patch: Partial<ComponentDraft>) {
     setComponents((current) =>
       current.map((component, position) =>
@@ -39,28 +75,27 @@ export function NewAdminKitPage() {
     event.preventDefault();
     setBusy(true);
     setError(null);
+    const body = {
+      name: name.trim(),
+      color: color.trim(),
+      price: Number(price),
+      components: components.map((component) => ({
+        name: component.name.trim(),
+        quantity: Number(component.quantity),
+        notes: component.notes.trim() || null,
+      })),
+    };
     try {
-      setCreated(
-        await createKit({
-          name: name.trim(),
-          color: color.trim(),
-          price: Number(price),
-          components: components.map((component) => ({
-            name: component.name.trim(),
-            quantity: Number(component.quantity),
-            notes: component.notes.trim() || null,
-          })),
-        }),
-      );
+      setCreated(kitId ? await updateKit(kitId, body) : await createKit(body));
     } catch {
       setError(
-        "Não foi possível cadastrar o kit. Confira os dados e se o nome já está em uso.",
+        `Não foi possível ${editing ? "salvar" : "cadastrar"} o kit. Confira os dados e se o nome já está em uso.`,
       );
     } finally {
       setBusy(false);
     }
   }
-  if (!user?.permissions.includes("KIT_CREATE"))
+  if (!user?.permissions.includes(editing ? "KIT_UPDATE" : "KIT_CREATE"))
     return (
       <AppShell>
         <section className="workflow-card">
@@ -71,18 +106,22 @@ export function NewAdminKitPage() {
   return (
     <AppShell>
       <section className="workflow-card workflow-card--narrow">
-        <p className="eyebrow">Novo cadastro</p>
-        <h1>Cadastrar kit</h1>
+        <p className="eyebrow">{editing ? "Edição" : "Novo cadastro"}</p>
+        <h1>{editing ? "Editar kit" : "Cadastrar kit"}</h1>
         <p>
           O kit agrupa componentes (vidros, perfis, ferragens) com um preço de
           referência para orçamentos.
         </p>
         {created ? (
           <div className="workflow-feedback">
-            <strong>{created.name} foi cadastrado.</strong>
+            <strong>
+              {created.name} foi {editing ? "atualizado" : "cadastrado"}.
+            </strong>
             <br />
             <Link to="/admin/kits">Ver kits</Link>
           </div>
+        ) : loading ? (
+          <p role="status">Carregando kit...</p>
         ) : (
           <form
             className="workflow-form"
@@ -217,7 +256,13 @@ export function NewAdminKitPage() {
               </button>
             </fieldset>
             <button className="button button--primary" disabled={busy}>
-              {busy ? "Cadastrando..." : "Cadastrar kit"}
+              {editing
+                ? busy
+                  ? "Salvando..."
+                  : "Salvar alterações"
+                : busy
+                  ? "Cadastrando..."
+                  : "Cadastrar kit"}
             </button>
           </form>
         )}

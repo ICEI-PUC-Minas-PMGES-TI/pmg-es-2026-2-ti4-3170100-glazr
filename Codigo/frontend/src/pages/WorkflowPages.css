@@ -223,6 +223,88 @@
   border-color: #d1dce5;
 }
 
+/* ── Tabela de Kits ── */
+.kits-table {
+  table-layout: fixed;
+}
+
+.kits-table__kit {
+  width: 24%;
+}
+
+.kits-table__price {
+  width: 9.5rem;
+}
+
+.kits-table__actions {
+  width: 8.5rem;
+}
+
+.kits-table .kits-table__number {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.kits-table .kits-table__center {
+  text-align: center;
+}
+
+.kits-table__identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.kits-table__identity strong {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.kits-table__identity .badge {
+  margin: 0;
+}
+
+.kit-components {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.kit-components__item {
+  gap: 0.3rem;
+  max-width: 100%;
+  margin: 0;
+}
+
+.kit-components__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kit-components__toggle {
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-xs);
+  padding: 0.2rem 0.55rem;
+  color: var(--color-blue-900);
+  background: transparent;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.kit-components__toggle:hover,
+.kit-components__toggle:focus-visible {
+  background: var(--color-blue-050);
+}
+
 /* ── Filter Bar & Item Counter ── */
 .filter-bar {
   display: flex;

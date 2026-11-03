@@ -10,7 +10,14 @@ export interface KitSummary {
   createdAt: string; updatedAt: string
 }
 
+export interface KitInput {
+  name: string; color: string; price: number; components: KitComponent[]
+}
+
 export const listKits = () => requestJson<Page<KitSummary>>('/api/v1/kits?size=100&sort=name,asc')
-export const createKit = (body: { name: string; color: string; price: number; components: KitComponent[] }) =>
+export const getKit = (id: string) => requestJson<KitSummary>(`/api/v1/kits/${id}`)
+export const createKit = (body: KitInput) =>
   csrfRequest<KitSummary>('/api/v1/kits', { method: 'POST', body: JSON.stringify(body) })
+export const updateKit = (id: string, body: KitInput) =>
+  csrfRequest<KitSummary>(`/api/v1/kits/${id}`, { method: 'PUT', body: JSON.stringify(body) })
 export const deleteKit = (id: string) => csrfRequest(`/api/v1/kits/${id}`, { method: 'DELETE' })

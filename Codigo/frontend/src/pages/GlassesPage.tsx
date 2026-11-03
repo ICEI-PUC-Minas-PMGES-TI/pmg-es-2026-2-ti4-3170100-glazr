@@ -155,7 +155,6 @@ export function GlassesPage() {
           ) : null}
         </div>
 
-        {/* ── Barra de Filtros e Busca ── */}
         <div className="filter-bar">
           <div className="filter-search">
             <Search size={16} className="filter-search__icon" />
@@ -229,7 +228,6 @@ export function GlassesPage() {
           </p>
         ) : null}
 
-        {/* ── Tabela de Vidros ── */}
         <table className="data-table">
           <thead>
             <tr>

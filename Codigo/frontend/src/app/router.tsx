@@ -11,7 +11,7 @@ import { AdminUsersPage } from '../pages/AdminUsersPage'
 import { NewAdminUserPage } from '../pages/NewAdminUserPage'
 import { EditAdminUserPage } from '../pages/EditAdminUserPage'
 import { AdminKitsPage } from '../pages/AdminKitsPage'
-import { NewAdminKitPage } from '../pages/NewAdminKitPage'
+import { EditAdminKitPage, NewAdminKitPage } from '../pages/NewAdminKitPage'
 import { GlassesPage } from '../pages/GlassesPage'
 import { NewGlassPage } from '../pages/NewGlassPage'
 import { EditGlassPage } from '../pages/EditGlassPage'
@@ -41,6 +41,7 @@ export function AppRoutes() {
         <Route path="/admin/users/:id/edit" element={<EditAdminUserPage />} />
         <Route path="/admin/kits" element={<AdminKitsPage />} />
         <Route path="/admin/kits/new" element={<NewAdminKitPage />} />
+        <Route path="/admin/kits/:id/edit" element={<EditAdminKitPage />} />
         <Route path="/glasses" element={<GlassesPage />} />
         <Route path="/glasses/new" element={<NewGlassPage />} />
         <Route path="/glasses/:id/edit" element={<EditGlassPage />} />
