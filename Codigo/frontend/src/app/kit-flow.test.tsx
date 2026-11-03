@@ -12,7 +12,7 @@ const kitsUser = {
   displayName: 'Gestor da Vidraçaria',
   active: true,
   profiles: ['ADMINISTRADOR'],
-  permissions: ['KIT_READ', 'KIT_CREATE', 'KIT_DELETE'],
+  permissions: ['KIT_READ', 'KIT_CREATE', 'KIT_UPDATE', 'KIT_DELETE'],
 }
 
 const existingKits = [
@@ -129,4 +129,42 @@ it('mostra erro quando o nome do kit já está em uso', async () => {
 
   expect(await screen.findByRole('alert')).toHaveTextContent(
     'Não foi possível cadastrar o kit. Confira os dados e se o nome já está em uso.')
+})
+it('edita kit existente carregando os dados e enviando PUT com CSRF', async () => {
+  const kit = existingKits[1]
+  let updatedBody: Record<string, unknown> | undefined
+  server.use(
+    http.get('http://localhost/api/v1/kits', () => HttpResponse.json({ content: existingKits })),
+    http.get(`http://localhost/api/v1/kits/${kit.id}`, () => HttpResponse.json(kit)),
+    http.put(`http://localhost/api/v1/kits/${kit.id}`, async ({ request }) => {
+      expect(request.headers.get('X-XSRF-TOKEN')).toBe('csrf-test-token')
+      updatedBody = (await request.json()) as Record<string, unknown>
+      return HttpResponse.json({ ...kit, ...updatedBody })
+    }),
+  )
+  window.history.replaceState({}, '', '/admin/kits')
+
+  const user = userEvent.setup()
+  render(<App />)
+
+  await user.click(await screen.findByRole('button', { name: 'Ações para Kit Porta Fumê' }))
+  await user.click(screen.getByRole('menuitem', { name: 'Editar' }))
+
+  const price = await screen.findByLabelText('Preço (R$)')
+  expect(screen.getByLabelText('Nome')).toHaveValue('Kit Porta Fumê')
+  expect(screen.getAllByLabelText('Componente')).toHaveLength(2)
+  await user.clear(price)
+  await user.type(price, '1020')
+  await user.click(screen.getByRole('button', { name: 'Salvar alterações' }))
+
+  expect(await screen.findByText('Kit Porta Fumê foi atualizado.')).toBeInTheDocument()
+  expect(updatedBody).toEqual({
+    name: 'Kit Porta Fumê',
+    color: 'Fumê',
+    price: 1020,
+    components: [
+      { name: 'Vidro 6mm', quantity: 1, notes: null },
+      { name: 'Ferragem', quantity: 1, notes: 'Inox' },
+    ],
+  })
 })

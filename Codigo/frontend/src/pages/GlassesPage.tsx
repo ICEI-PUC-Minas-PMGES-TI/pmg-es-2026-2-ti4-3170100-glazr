@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Edit3, Plus, Search, Trash2 } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { CircleCheck, CircleOff, Edit3, Plus, Search, Trash2 } from 'lucide-react'
 import { useAuth } from '../features/auth/hooks/use-auth'
 import {
   deleteGlass,
@@ -8,6 +8,7 @@ import {
   updateGlassStatus,
   type GlassSummary,
 } from '../features/glasses/api/glasses-api'
+import { ActionsMenu, type ActionsMenuItem } from '../shared/components/ActionsMenu'
 import { AppShell } from '../shared/components/AppShell'
 import { currencyFormatter } from '../shared/format/formatters'
 import './WorkflowPages.css'
@@ -24,6 +25,7 @@ const THICKNESS_OPTIONS = [3, 4, 5, 6, 8, 10, 12, 15, 19]
 
 export function GlassesPage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [glasses, setGlasses] = useState<GlassSummary[]>([])
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -85,6 +87,43 @@ export function GlassesPage() {
     })
   }, [glasses, search, statusFilter, thicknessFilter, finishFilter])
 
+  function actionsFor(item: GlassSummary): ActionsMenuItem[] {
+    const permissions = user?.permissions ?? []
+    const actions: ActionsMenuItem[] = []
+    if (permissions.includes('GLASS_UPDATE')) {
+      actions.push(
+        {
+          label: 'Editar',
+          icon: <Edit3 size={16} aria-hidden="true" />,
+          onSelect: () => void navigate(`/glasses/${item.id}/edit`),
+        },
+        {
+          label: item.active ? 'Inativar' : 'Ativar',
+          icon: item.active ? <CircleOff size={16} aria-hidden="true" /> : <CircleCheck size={16} aria-hidden="true" />,
+          onSelect: () =>
+            void act(
+              item.id,
+              () => updateGlassStatus(item.id, !item.active),
+              `Status do vidro "${item.name}" alterado para ${!item.active ? 'Ativo' : 'Inativo'}.`,
+            ),
+        },
+      )
+    }
+    if (permissions.includes('GLASS_DELETE')) {
+      actions.push({
+        label: 'Excluir',
+        icon: <Trash2 size={16} aria-hidden="true" />,
+        tone: 'danger',
+        onSelect: () => {
+          if (window.confirm(`Deseja realmente remover o vidro "${item.name}" (${item.thicknessMm}mm - ${item.finish})?`)) {
+            void act(item.id, () => deleteGlass(item.id), `Vidro "${item.name}" excluído com sucesso.`)
+          }
+        },
+      })
+    }
+    return actions
+  }
+
   const totalCount = glasses.length
   const activeCount = glasses.filter((g) => g.active).length
   const inactiveCount = totalCount - activeCount
@@ -116,7 +155,6 @@ export function GlassesPage() {
           ) : null}
         </div>
 
-        {/* ── Barra de Filtros e Busca ── */}
         <div className="filter-bar">
           <div className="filter-search">
             <Search size={16} className="filter-search__icon" />
@@ -190,7 +228,6 @@ export function GlassesPage() {
           </p>
         ) : null}
 
-        {/* ── Tabela de Vidros ── */}
         <table className="data-table">
           <thead>
             <tr>
@@ -234,58 +271,11 @@ export function GlassesPage() {
                     </span>
                   </td>
                   <td>
-                    <div className="workflow-actions" style={{ justifyContent: 'flex-start' }}>
-                      {user.permissions.includes('GLASS_UPDATE') ? (
-                        <>
-                          <Link
-                            className="button button--secondary"
-                            to={`/glasses/${item.id}/edit`}
-                            style={{ minHeight: '2.3rem', padding: '0.4rem 0.8rem', fontSize: '0.82rem' }}
-                          >
-                            <Edit3 size={14} style={{ marginRight: '0.35rem' }} />
-                            Editar
-                          </Link>
-                          <button
-                            className="button button--secondary"
-                            disabled={busy === item.id}
-                            onClick={() =>
-                              void act(
-                                item.id,
-                                () => updateGlassStatus(item.id, !item.active),
-                                `Status do vidro "${item.name}" alterado para ${!item.active ? 'Ativo' : 'Inativo'}.`,
-                              )
-                            }
-                            style={{ minHeight: '2.3rem', padding: '0.4rem 0.8rem', fontSize: '0.82rem' }}
-                          >
-                            {item.active ? 'Inativar' : 'Ativar'}
-                          </button>
-                        </>
-                      ) : null}
-
-                      {user.permissions.includes('GLASS_DELETE') ? (
-                        <button
-                          className="button button--secondary"
-                          disabled={busy === item.id}
-                          onClick={() => {
-                            if (window.confirm(`Deseja realmente remover o vidro "${item.name}" (${item.thicknessMm}mm - ${item.finish})?`)) {
-                              void act(
-                                item.id,
-                                () => deleteGlass(item.id),
-                                `Vidro "${item.name}" excluído com sucesso.`,
-                              )
-                            }
-                          }}
-                          style={{
-                            minHeight: '2.3rem',
-                            padding: '0.4rem 0.8rem',
-                            fontSize: '0.82rem',
-                            color: 'var(--color-red-600, #b91c1c)',
-                          }}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      ) : null}
-                    </div>
+                    <ActionsMenu
+                      label={`Ações para ${item.name}`}
+                      disabled={busy === item.id}
+                      items={actionsFor(item)}
+                    />
                   </td>
                 </tr>
               ))
