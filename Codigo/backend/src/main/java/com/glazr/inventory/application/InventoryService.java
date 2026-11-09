@@ -27,11 +27,13 @@ import java.math.RoundingMode;
 import java.time.Clock;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 @Service
 public class InventoryService {
 
-    private static final BigDecimal ZERO = BigDecimal.ZERO.setScale(6);
+    private static final int AREA_SCALE = 6;
+    private static final BigDecimal ZERO = BigDecimal.ZERO.setScale(AREA_SCALE);
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
 
     private final GlassRepository glasses;
@@ -99,7 +101,7 @@ public class InventoryService {
     @Transactional
     public List<GlassSheetResponse> receive(UUID glassId, ReceiveSheetsRequest request, UUID performedByUserId) {
         requireGlass(glassId);
-        List<GlassSheetEntity> receivedSheets = java.util.stream.IntStream.range(0, request.quantity())
+        List<GlassSheetEntity> receivedSheets = IntStream.range(0, request.quantity())
                 .mapToObj(ignored -> GlassSheetEntity.create(
                         glassId, request.widthMm(), request.heightMm(), clock.instant()))
                 .toList();
@@ -129,19 +131,27 @@ public class InventoryService {
     public ManualCutResponse cut(UUID sheetId, UpdateSheetStockRequest.Cut request, UUID performedByUserId) {
         GlassSheetEntity sheet = requireSheetForUpdate(sheetId);
         BigDecimal previousRemainingAreaM2 = sheet.getRemainingAreaM2();
+        CutCalculation calculation = calculateCut(previousRemainingAreaM2, request);
+
+        sheet.updateRemainingArea(calculation.usableRemainderAreaM2(), clock.instant());
+        StockMovementEntity movement = StockMovementEntity.manualCut(
+                sheet, previousRemainingAreaM2, request.pieceWidthMm(), request.pieceHeightMm(),
+                calculation.pieceAreaM2(), calculation.lossAreaM2(), request.notes(),
+                performedByUserId, clock.instant());
+        movements.save(movement);
+        return ManualCutResponse.from(sheet, movement, calculation.yieldPercent());
+    }
+
+    private CutCalculation calculateCut(BigDecimal availableAreaM2, UpdateSheetStockRequest.Cut request) {
         BigDecimal pieceAreaM2 = GlassSheetEntity.calculateArea(request.pieceWidthMm(), request.pieceHeightMm());
-        BigDecimal usableRemainderAreaM2 = request.usableRemainderAreaM2().setScale(6, RoundingMode.HALF_UP);
+        BigDecimal usableRemainderAreaM2 = request.usableRemainderAreaM2().setScale(AREA_SCALE, RoundingMode.HALF_UP);
         BigDecimal consumedAreaM2 = pieceAreaM2.add(usableRemainderAreaM2);
-        if (consumedAreaM2.compareTo(previousRemainingAreaM2) > 0) {
+        if (consumedAreaM2.compareTo(availableAreaM2) > 0) {
             throw new IllegalArgumentException("Peça e sobra útil não podem superar o saldo disponível da chapa");
         }
-        BigDecimal lossAreaM2 = previousRemainingAreaM2.subtract(consumedAreaM2);
-        sheet.updateRemainingArea(usableRemainderAreaM2, clock.instant());
-        StockMovementEntity movement = StockMovementEntity.manualCut(
-                sheet, previousRemainingAreaM2, request.pieceWidthMm(), request.pieceHeightMm(), pieceAreaM2,
-                lossAreaM2, request.notes(), performedByUserId, clock.instant());
-        movements.save(movement);
-        return ManualCutResponse.from(sheet, movement, yieldPercent(pieceAreaM2, lossAreaM2));
+        BigDecimal lossAreaM2 = availableAreaM2.subtract(consumedAreaM2);
+        BigDecimal yield = yieldPercent(pieceAreaM2, lossAreaM2);
+        return new CutCalculation(pieceAreaM2, usableRemainderAreaM2, lossAreaM2, yield);
     }
 
     private GlassEntity requireGlass(UUID id) {
@@ -154,11 +164,15 @@ public class InventoryService {
 
     private GlassStockSummaryResponse summaryFor(GlassEntity glass) {
         BigDecimal availableAreaM2 = normalizeArea(sheets.sumRemainingAreaByGlassId(glass.getId()));
-        BigDecimal minimumAreaM2 = settings.findById(glass.getId())
-                .map(GlassStockSettingEntity::getMinimumAreaM2)
-                .orElse(null);
+        BigDecimal minimumAreaM2 = findMinimumArea(glass.getId());
         return GlassStockSummaryResponse.from(glass, availableAreaM2, minimumAreaM2,
                 statusFor(availableAreaM2, minimumAreaM2));
+    }
+
+    private BigDecimal findMinimumArea(UUID glassId) {
+        return settings.findById(glassId)
+                .map(GlassStockSettingEntity::getMinimumAreaM2)
+                .orElse(null);
     }
 
     private BigDecimal normalizeArea(BigDecimal area) {
@@ -176,4 +190,11 @@ public class InventoryService {
                 .multiply(ONE_HUNDRED)
                 .divide(processedAreaM2, 2, RoundingMode.HALF_UP);
     }
+
+    private record CutCalculation(
+            BigDecimal pieceAreaM2,
+            BigDecimal usableRemainderAreaM2,
+            BigDecimal lossAreaM2,
+            BigDecimal yieldPercent
+    ) {}
 }
