@@ -108,7 +108,13 @@ class AuthorizationMatrixIntegrationTest {
             expected("inventory minimum update", 404, "RESOURCE_NOT_FOUND"),
             expected("inventory sheet receipt", 404, "RESOURCE_NOT_FOUND"),
             expected("inventory sheet adjustment", 404, "RESOURCE_NOT_FOUND"),
-            expected("inventory sheet cut", 404, "RESOURCE_NOT_FOUND")
+            expected("inventory sheet cut", 404, "RESOURCE_NOT_FOUND"),
+            expected("quote creation", 201),
+            expected("quote listing", 200),
+            expected("quote detail", 404, "RESOURCE_NOT_FOUND"),
+            expected("quote update", 404, "RESOURCE_NOT_FOUND"),
+            expected("quote status update", 404, "RESOURCE_NOT_FOUND"),
+            expected("quote deletion", 404, "RESOURCE_NOT_FOUND")
     );
 
     private static final List<EndpointCase> ENDPOINTS = List.of(
@@ -234,7 +240,23 @@ class AuthorizationMatrixIntegrationTest {
                     "/api/v1/inventory/sheets/" + MISSING_ID + "/cuts",
                     "{\"pieceWidthMm\":500.00,\"pieceHeightMm\":500.00,"
                             + "\"usableRemainderAreaM2\":1.000000,\"notes\":\"Corte de teste\"}",
-                    "GLASS_UPDATE")
+                    "GLASS_UPDATE"),
+
+            permissionEndpoint("quote creation", HttpMethod.POST, "/api/v1/quotes",
+                    "{\"customerName\":\"Cliente Matriz\",\"customerPhone\":\"31999999999\","
+                            + "\"customerEmail\":\"cliente@teste.com\",\"customerAddress\":\"Rua Teste, 100\","
+                            + "\"laborCost\":50.00,\"freightCost\":30.00,\"glassItems\":[],\"kitItems\":[]}",
+                    "QUOTE_CREATE"),
+            permissionEndpoint("quote listing", HttpMethod.GET, "/api/v1/quotes", null, "QUOTE_READ"),
+            permissionEndpoint("quote detail", HttpMethod.GET, "/api/v1/quotes/" + MISSING_ID, null, "QUOTE_READ"),
+            permissionEndpoint("quote update", HttpMethod.PUT, "/api/v1/quotes/" + MISSING_ID,
+                    "{\"customerName\":\"Cliente Atualizado\",\"customerPhone\":\"31999999999\","
+                            + "\"customerEmail\":\"cliente@teste.com\",\"customerAddress\":\"Rua Teste, 100\","
+                            + "\"laborCost\":60.00,\"freightCost\":35.00,\"glassItems\":[],\"kitItems\":[]}",
+                    "QUOTE_UPDATE"),
+            permissionEndpoint("quote status update", HttpMethod.PATCH, "/api/v1/quotes/" + MISSING_ID + "/status",
+                    "{\"status\":\"APPROVED\"}", "QUOTE_STATUS_UPDATE"),
+            permissionEndpoint("quote deletion", HttpMethod.DELETE, "/api/v1/quotes/" + MISSING_ID, null, "QUOTE_DELETE")
     );
 
     @DynamicPropertySource
