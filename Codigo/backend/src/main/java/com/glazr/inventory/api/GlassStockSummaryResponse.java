@@ -1,7 +1,7 @@
 package com.glazr.inventory.api;
 
-import com.glazr.inventory.domain.StockStatus;
 import com.glazr.glass.infrastructure.GlassEntity;
+import com.glazr.inventory.domain.StockStatus;
 
 import java.math.BigDecimal;
 import java.util.UUID;

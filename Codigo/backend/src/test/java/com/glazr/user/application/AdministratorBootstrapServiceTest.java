@@ -2,9 +2,9 @@ package com.glazr.user.application;
 
 import com.glazr.accessprofile.infrastructure.AccessProfileRepository;
 import com.glazr.configuration.BootstrapCredentials;
+import com.glazr.credential.infrastructure.PasswordCredentialRepository;
 import com.glazr.permission.infrastructure.PermissionRepository;
 import com.glazr.user.infrastructure.UserRepository;
-import com.glazr.credential.infrastructure.PasswordCredentialRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 

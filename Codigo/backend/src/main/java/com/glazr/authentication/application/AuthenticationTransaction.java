@@ -1,15 +1,16 @@
 package com.glazr.authentication.application;
 
-import com.glazr.user.infrastructure.UserEntity;
-import com.glazr.user.infrastructure.UserRepository;
 import com.glazr.credential.domain.AuthenticationMethod;
 import com.glazr.credential.infrastructure.ExternalIdentityEntity;
 import com.glazr.credential.infrastructure.ExternalIdentityRepository;
 import com.glazr.credential.infrastructure.PasswordCredentialRepository;
-import java.time.Clock;
-import java.util.UUID;
+import com.glazr.user.infrastructure.UserEntity;
+import com.glazr.user.infrastructure.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.util.UUID;
 
 @Service
 public class AuthenticationTransaction {

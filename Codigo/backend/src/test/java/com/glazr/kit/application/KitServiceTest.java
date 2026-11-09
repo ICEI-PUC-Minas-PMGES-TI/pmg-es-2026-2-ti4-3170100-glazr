@@ -1,11 +1,5 @@
 package com.glazr.kit.application;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.glazr.kit.api.KitComponentRequest;
 import com.glazr.kit.api.KitRequest;
 import com.glazr.kit.api.KitResponse;
@@ -14,13 +8,20 @@ import com.glazr.kit.infrastructure.KitEntity;
 import com.glazr.kit.infrastructure.KitRepository;
 import com.glazr.shared.exception.ConflictException;
 import com.glazr.shared.exception.ResourceNotFoundException;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class KitServiceTest {
 

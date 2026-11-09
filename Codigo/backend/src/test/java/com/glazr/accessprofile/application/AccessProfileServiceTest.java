@@ -1,19 +1,20 @@
 package com.glazr.accessprofile.application;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.glazr.accessprofile.api.AccessProfileRequest;
 import com.glazr.accessprofile.infrastructure.AccessProfileEntity;
 import com.glazr.accessprofile.infrastructure.AccessProfileRepository;
 import com.glazr.permission.infrastructure.PermissionRepository;
 import com.glazr.shared.exception.ConflictException;
 import com.glazr.user.infrastructure.UserRepository;
+import org.junit.jupiter.api.Test;
+
 import java.time.Clock;
 import java.util.Optional;
 import java.util.Set;
-import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class AccessProfileServiceTest {
 

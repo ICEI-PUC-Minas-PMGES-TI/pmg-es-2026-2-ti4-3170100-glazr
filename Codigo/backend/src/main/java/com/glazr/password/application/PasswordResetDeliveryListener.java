@@ -1,12 +1,12 @@
 package com.glazr.password.application;
 
 import com.glazr.mail.application.EmployeeMailSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import org.springframework.scheduling.annotation.Async;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Component
 public class PasswordResetDeliveryListener {

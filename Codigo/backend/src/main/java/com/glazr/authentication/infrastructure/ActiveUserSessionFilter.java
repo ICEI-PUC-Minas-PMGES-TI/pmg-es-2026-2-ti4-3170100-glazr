@@ -2,12 +2,12 @@ package com.glazr.authentication.infrastructure;
 
 import com.glazr.authentication.application.AuthenticatedUser;
 import com.glazr.authentication.application.AuthenticatedUserFactory;
-import com.glazr.shared.api.SecurityProblemWriter;
-import com.glazr.user.infrastructure.UserRepository;
 import com.glazr.credential.domain.AuthenticationMethod;
 import com.glazr.credential.infrastructure.ExternalIdentityEntity;
 import com.glazr.credential.infrastructure.ExternalIdentityRepository;
 import com.glazr.credential.infrastructure.PasswordCredentialRepository;
+import com.glazr.shared.api.SecurityProblemWriter;
+import com.glazr.user.infrastructure.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

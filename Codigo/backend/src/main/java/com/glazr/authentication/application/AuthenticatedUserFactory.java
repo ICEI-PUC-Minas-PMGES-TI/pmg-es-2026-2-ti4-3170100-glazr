@@ -1,12 +1,12 @@
 package com.glazr.authentication.application;
 
 import com.glazr.accessprofile.infrastructure.AccessProfileEntity;
-import com.glazr.permission.infrastructure.PermissionEntity;
 import com.glazr.credential.domain.AuthenticationMethod;
+import com.glazr.permission.infrastructure.PermissionEntity;
 import com.glazr.user.infrastructure.UserEntity;
 
-import java.util.List;
 import java.util.Collection;
+import java.util.List;
 import java.util.TreeSet;
 
 public final class AuthenticatedUserFactory {

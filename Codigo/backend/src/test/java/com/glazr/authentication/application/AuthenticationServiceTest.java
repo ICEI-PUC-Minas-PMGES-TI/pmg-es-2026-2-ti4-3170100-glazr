@@ -1,11 +1,11 @@
 package com.glazr.authentication.application;
 
 import com.glazr.accessprofile.infrastructure.AccessProfileEntity;
-import com.glazr.user.infrastructure.UserEntity;
-import com.glazr.user.infrastructure.UserRepository;
 import com.glazr.credential.infrastructure.ExternalIdentityRepository;
 import com.glazr.credential.infrastructure.PasswordCredentialEntity;
 import com.glazr.credential.infrastructure.PasswordCredentialRepository;
+import com.glazr.user.infrastructure.UserEntity;
+import com.glazr.user.infrastructure.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;

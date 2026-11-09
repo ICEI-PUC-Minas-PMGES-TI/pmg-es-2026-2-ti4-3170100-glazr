@@ -1,16 +1,17 @@
 package com.glazr.kit.api;
 
+import com.glazr.kit.application.KitService;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import com.glazr.kit.application.KitService;
-import java.math.BigDecimal;
-import java.util.UUID;
-import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
 class KitControllerTest {
 

@@ -1,18 +1,19 @@
 package com.glazr.user.application;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.glazr.accessprofile.infrastructure.AccessProfileEntity;
 import com.glazr.accessprofile.infrastructure.AccessProfileRepository;
 import com.glazr.authentication.infrastructure.UserSessionService;
+import com.glazr.credential.application.TemporaryTokenService;
+import com.glazr.credential.infrastructure.ExternalIdentityRepository;
+import com.glazr.credential.infrastructure.PasswordCredentialRepository;
+import com.glazr.invitation.infrastructure.EmployeeInvitationEntity;
+import com.glazr.invitation.infrastructure.EmployeeInvitationRepository;
 import com.glazr.user.api.CreateUserRequest;
 import com.glazr.user.infrastructure.UserEntity;
 import com.glazr.user.infrastructure.UserRepository;
-import com.glazr.credential.infrastructure.ExternalIdentityRepository;
-import com.glazr.credential.infrastructure.PasswordCredentialRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -20,11 +21,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import org.junit.jupiter.api.Test;
-import com.glazr.credential.application.TemporaryTokenService;
-import com.glazr.invitation.infrastructure.EmployeeInvitationEntity;
-import com.glazr.invitation.infrastructure.EmployeeInvitationRepository;
-import org.springframework.context.ApplicationEventPublisher;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class UserManagementServiceTest {
 

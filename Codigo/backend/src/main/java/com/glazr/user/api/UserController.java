@@ -1,9 +1,9 @@
 package com.glazr.user.api;
 
-import com.glazr.user.application.UserManagementService;
 import com.glazr.authentication.infrastructure.GlazrUserPrincipal;
 import com.glazr.invitation.api.InvitationResponse;
 import com.glazr.invitation.application.InvitationService;
+import com.glazr.user.application.UserManagementService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

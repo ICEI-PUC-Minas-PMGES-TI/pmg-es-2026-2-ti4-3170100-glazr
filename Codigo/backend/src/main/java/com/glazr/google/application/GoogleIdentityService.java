@@ -14,8 +14,8 @@ import com.glazr.user.domain.AccountType;
 import com.glazr.user.domain.EmailAddress;
 import com.glazr.user.infrastructure.UserEntity;
 import com.glazr.user.infrastructure.UserRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,11 +1,11 @@
 package com.glazr.invitation.application;
 
 import com.glazr.mail.application.EmployeeMailSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Component
 public class InvitationDeliveryListener {

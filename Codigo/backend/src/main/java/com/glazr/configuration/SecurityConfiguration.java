@@ -1,13 +1,13 @@
 package com.glazr.configuration;
 
 import com.glazr.authentication.infrastructure.ActiveUserSessionFilter;
-import com.glazr.shared.api.SecurityProblemWriter;
+import com.glazr.google.infrastructure.DiscardingOAuth2AuthorizedClientRepository;
 import com.glazr.google.infrastructure.GoogleAuthenticationFailureHandler;
 import com.glazr.google.infrastructure.GoogleAuthenticationSuccessHandler;
-import com.glazr.google.infrastructure.DiscardingOAuth2AuthorizedClientRepository;
+import com.glazr.shared.api.SecurityProblemWriter;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

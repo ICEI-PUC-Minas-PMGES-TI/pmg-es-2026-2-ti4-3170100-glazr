@@ -7,8 +7,8 @@ import com.glazr.user.infrastructure.UserRepository;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.Set;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;

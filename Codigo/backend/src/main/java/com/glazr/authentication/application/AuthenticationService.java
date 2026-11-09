@@ -1,11 +1,12 @@
 package com.glazr.authentication.application;
 
+import com.glazr.credential.infrastructure.PasswordCredentialRepository;
 import com.glazr.user.domain.EmailAddress;
 import com.glazr.user.infrastructure.UserEntity;
 import com.glazr.user.infrastructure.UserRepository;
-import com.glazr.credential.infrastructure.PasswordCredentialRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 
 @Service
