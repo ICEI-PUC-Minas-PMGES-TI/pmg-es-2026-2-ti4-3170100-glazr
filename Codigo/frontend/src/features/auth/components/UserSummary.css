@@ -4,27 +4,105 @@
 }
 
 .user-summary__hero {
+  position: relative;
   display: flex;
+  overflow: hidden;
   align-items: flex-end;
   justify-content: space-between;
   gap: 2rem;
+  min-height: 11rem;
   margin-bottom: 2.5rem;
+  border-radius: 18px;
+  padding: clamp(1.75rem, 4vw, 2.75rem);
+  color: var(--color-surface);
+  background: var(--gradient-hero);
+  box-shadow: 0 24px 60px rgb(59 47 180 / 28%), inset 0 1px 0 rgb(255 255 255 / 18%);
+  animation: hero-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.user-summary__hero > div:last-child {
+  position: relative;
+  z-index: 1;
+}
+
+.user-summary__hero .eyebrow {
+  color: #a5f0ff;
+  background: linear-gradient(90deg, #a5f0ff, #ffd27a);
+  background-clip: text;
+  -webkit-background-clip: text;
 }
 
 .user-summary__hero h1 {
-  margin-bottom: 0.5rem;
-  color: var(--color-blue-950);
+  margin-bottom: 0;
+  color: var(--color-surface);
   font-family: var(--font-heading);
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(2rem, 5vw, 3.1rem);
   line-height: 1.1;
   letter-spacing: -0.04em;
+  text-shadow: 0 4px 24px rgb(0 0 0 / 18%);
 }
 
-.user-summary__hero p:last-child {
-  max-width: 38rem;
-  margin-bottom: 0;
-  color: var(--color-text-muted);
-  font-size: 1.02rem;
+/* Estilhaços de vidro flutuando no banner */
+.user-summary__shards span {
+  position: absolute;
+  border: 1px solid rgb(255 255 255 / 35%);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgb(255 255 255 / 30%), rgb(255 255 255 / 4%));
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 45%);
+  animation: shard-float 9s ease-in-out infinite;
+}
+
+.user-summary__shards span:nth-child(1) {
+  top: -2.5rem;
+  right: 8%;
+  width: 9rem;
+  height: 9rem;
+  transform: rotate(18deg);
+}
+
+.user-summary__shards span:nth-child(2) {
+  right: 26%;
+  bottom: -3rem;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgb(255 210 122 / 70%), rgb(224 69 143 / 25%));
+  animation-delay: -3s;
+}
+
+.user-summary__shards span:nth-child(3) {
+  top: 1.5rem;
+  right: 32%;
+  width: 2.75rem;
+  height: 2.75rem;
+  transform: rotate(-12deg);
+  background: linear-gradient(135deg, rgb(14 165 198 / 70%), rgb(124 92 255 / 30%));
+  animation-delay: -5s;
+}
+
+.user-summary__shards span:nth-child(4) {
+  right: 3%;
+  bottom: 1.25rem;
+  width: 4rem;
+  height: 4rem;
+  transform: rotate(40deg);
+  animation-delay: -1.5s;
+}
+
+@keyframes shard-float {
+  50% {
+    translate: 0 -10px;
+    rotate: 6deg;
+  }
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.99);
+  }
 }
 
 .user-summary__section {
@@ -35,10 +113,11 @@
   display: grid;
   gap: 0.75rem;
   margin-bottom: 2rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border: 1px solid rgb(242 162 12 / 30%);
+  border-left: 5px solid var(--accent-amber);
+  border-radius: 12px;
   padding: 1.2rem;
-  background: var(--glass-bg);
+  background: linear-gradient(100deg, var(--accent-amber-soft), rgb(255 255 255 / 80%) 60%);
   box-shadow: var(--shadow-sm), var(--glass-reflection);
 }
 
@@ -66,6 +145,24 @@
   flex: 1;
 }
 
+.inventory-dashboard__alert-icon {
+  display: grid;
+  width: 2.4rem;
+  height: 2.4rem;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-surface);
+  background: linear-gradient(135deg, var(--accent-amber), var(--accent-coral));
+  box-shadow: 0 0 0 0 rgb(242 100 61 / 45%);
+  animation: alert-pulse 2s ease-out infinite;
+}
+
+@keyframes alert-pulse {
+  70% {
+    box-shadow: 0 0 0 12px rgb(242 100 61 / 0%);
+  }
+}
+
 .section-title {
   margin-bottom: 1.1rem;
   color: var(--color-blue-950);
@@ -83,12 +180,19 @@
 }
 
 .shortcut-card {
+  --card-accent: var(--accent-violet);
+  --card-accent-soft: var(--accent-violet-soft);
+  --card-accent-2: var(--accent-cyan);
+
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
+  border-radius: 14px;
   padding: 1.4rem;
   color: var(--color-text);
+  animation: hero-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -100,11 +204,81 @@
     background var(--transition);
 }
 
+.shortcut-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  content: "";
+  background: linear-gradient(90deg, var(--card-accent), var(--card-accent-2));
+}
+
+.shortcut-card::after {
+  position: absolute;
+  top: -4rem;
+  right: -4rem;
+  width: 10rem;
+  height: 10rem;
+  border-radius: 50%;
+  content: "";
+  background: radial-gradient(circle, var(--card-accent-soft), transparent 70%);
+  opacity: 0.9;
+  transition: transform var(--transition-smooth);
+  pointer-events: none;
+}
+
+.shortcut-card > * {
+  position: relative;
+  z-index: 1;
+}
+
 .shortcut-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--color-blue-300);
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--card-accent) 45%, transparent);
   background: var(--glass-bg-hover);
-  box-shadow: var(--shadow-md), 0 0 0 1px var(--color-blue-100), var(--glass-reflection);
+  box-shadow:
+    0 18px 40px color-mix(in srgb, var(--card-accent) 22%, transparent),
+    var(--glass-reflection);
+}
+
+.shortcut-card:hover::after {
+  transform: scale(1.5);
+}
+
+.shortcut-grid > :nth-child(2) { animation-delay: 60ms; }
+.shortcut-grid > :nth-child(3) { animation-delay: 120ms; }
+.shortcut-grid > :nth-child(4) { animation-delay: 180ms; }
+.shortcut-grid > :nth-child(5) { animation-delay: 240ms; }
+
+.shortcut-card--violet {
+  --card-accent: var(--accent-violet);
+  --card-accent-soft: var(--accent-violet-soft);
+  --card-accent-2: var(--accent-magenta);
+}
+
+.shortcut-card--cyan {
+  --card-accent: var(--accent-cyan);
+  --card-accent-soft: var(--accent-cyan-soft);
+  --card-accent-2: #3b82f6;
+}
+
+.shortcut-card--amber {
+  --card-accent: var(--accent-amber);
+  --card-accent-soft: var(--accent-amber-soft);
+  --card-accent-2: var(--accent-coral);
+}
+
+.shortcut-card--magenta {
+  --card-accent: var(--accent-magenta);
+  --card-accent-soft: var(--accent-magenta-soft);
+  --card-accent-2: var(--accent-violet);
+}
+
+.shortcut-card--emerald {
+  --card-accent: var(--accent-emerald);
+  --card-accent-soft: var(--accent-emerald-soft);
+  --card-accent-2: var(--accent-cyan);
 }
 
 .shortcut-card__header {
@@ -116,23 +290,28 @@
 
 .shortcut-card__icon {
   display: grid;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.75rem;
+  height: 2.75rem;
   place-items: center;
-  border: 1px solid rgb(255 255 255 / 80%);
-  border-radius: var(--radius-xs);
-  color: var(--color-blue-700);
-  background: var(--color-blue-050);
-  box-shadow: 0 2px 6px rgb(47 85 127 / 10%);
+  border: 1px solid rgb(255 255 255 / 40%);
+  border-radius: 12px;
+  color: var(--color-surface);
+  background: linear-gradient(135deg, var(--card-accent), var(--card-accent-2));
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--card-accent) 35%, transparent), inset 0 1px 0 rgb(255 255 255 / 35%);
+  transition: transform var(--transition);
+}
+
+.shortcut-card:hover .shortcut-card__icon {
+  transform: rotate(-6deg) scale(1.06);
 }
 
 .shortcut-card__badge {
   display: inline-flex;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xs);
-  padding: 0.2rem 0.5rem;
-  color: var(--color-blue-900);
-  background: var(--color-blue-050);
+  border: 1px solid color-mix(in srgb, var(--card-accent) 30%, transparent);
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  color: color-mix(in srgb, var(--card-accent) 80%, #10203a);
+  background: var(--card-accent-soft);
   font-family: var(--font-heading);
   font-size: 0.72rem;
   font-weight: 700;
@@ -161,7 +340,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: var(--color-blue-700);
+  color: color-mix(in srgb, var(--card-accent) 85%, #10203a);
   font-family: var(--font-heading);
   font-size: 0.85rem;
   font-weight: 700;
@@ -169,8 +348,7 @@
 }
 
 .shortcut-card:hover .shortcut-card__action {
-  gap: 0.65rem;
-  color: var(--color-blue-900);
+  gap: 0.75rem;
 }
 
 /* ── Session Information Grid ── */

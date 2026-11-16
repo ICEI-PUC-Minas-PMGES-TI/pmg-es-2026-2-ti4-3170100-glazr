@@ -107,8 +107,13 @@ p {
 }
 
 .eyebrow {
+  width: fit-content;
   margin-bottom: 0.65rem;
-  color: var(--color-blue-500);
+  color: var(--accent-violet);
+  background: var(--gradient-prism);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-family: var(--font-heading);
   font-size: 0.72rem;
   font-weight: 800;
@@ -148,14 +153,14 @@ p {
 .button--primary {
   color: var(--color-surface);
   border: 1px solid rgb(255 255 255 / 15%);
-  background: linear-gradient(180deg, var(--color-blue-700) 0%, var(--color-blue-900) 100%);
-  box-shadow: 0 4px 14px rgb(47 85 127 / 25%), inset 0 1px 0 rgb(255 255 255 / 25%);
+  background: var(--gradient-primary);
+  box-shadow: 0 6px 18px rgb(91 75 240 / 30%), inset 0 1px 0 rgb(255 255 255 / 25%);
 }
 
 .button--primary:not(:disabled):hover {
   border-color: rgb(255 255 255 / 25%);
-  background: linear-gradient(180deg, var(--color-blue-900) 0%, var(--color-blue-950) 100%);
-  box-shadow: 0 6px 20px rgb(47 85 127 / 35%), inset 0 1px 0 rgb(255 255 255 / 35%);
+  background: var(--gradient-primary-hover);
+  box-shadow: 0 10px 26px rgb(91 75 240 / 40%), inset 0 1px 0 rgb(255 255 255 / 35%);
 }
 
 .button--secondary {
@@ -168,8 +173,9 @@ p {
 }
 
 .button--secondary:not(:disabled):hover {
-  border-color: var(--color-blue-300);
-  background: var(--color-blue-050);
+  border-color: var(--accent-violet);
+  color: var(--accent-violet);
+  background: var(--accent-violet-soft);
   box-shadow: 0 4px 14px rgb(47 85 127 / 12%), inset 0 1px 0 rgb(255 255 255 / 100%);
 }
 
@@ -185,7 +191,7 @@ p {
 
 .app-loading__mark {
   color: var(--color-surface);
-  background: var(--color-blue-700);
+  background: var(--gradient-primary);
   animation: loading-pulse 1.4s ease-in-out infinite;
 }
 

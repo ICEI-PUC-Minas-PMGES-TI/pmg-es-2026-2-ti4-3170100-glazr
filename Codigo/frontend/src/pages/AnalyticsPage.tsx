@@ -21,9 +21,27 @@ import './AnalyticsPage.css'
 
 const MAX_GLASSES_IN_AREA_CHART = 10
 
-const BAR_COLOR = '#2f557f'
 const AXIS_COLOR = '#5f7283'
-const GRID_COLOR = '#e3ecf3'
+const GRID_COLOR = '#ebe7fb'
+const CURSOR_FILL = 'rgb(124 92 255 / 8%)'
+
+// Cada gráfico ganha seu gradiente, combinando com a faixa colorida do card
+const chartGradients = {
+  area: ['#0ea5c6', '#7c5cff'],
+  finish: ['#7c5cff', '#e0458f'],
+  price: ['#f2a20c', '#f2643d'],
+} as const
+
+function BarGradient({ id, colors, vertical = false }: Readonly<{ id: string; colors: readonly [string, string]; vertical?: boolean }>) {
+  return (
+    <defs>
+      <linearGradient id={id} x1="0" y1={vertical ? '1' : '0'} x2={vertical ? '0' : '1'} y2="0">
+        <stop offset="0%" stopColor={colors[0]} />
+        <stop offset="100%" stopColor={colors[1]} />
+      </linearGradient>
+    </defs>
+  )
+}
 
 const statusLabels: Readonly<Record<StockStatus, string>> = {
   OK: 'Regular',
@@ -32,9 +50,9 @@ const statusLabels: Readonly<Record<StockStatus, string>> = {
 }
 
 const statusColors: Readonly<Record<StockStatus, string>> = {
-  OK: '#2e8b6e',
-  LOW: '#c95b2b',
-  UNCONFIGURED: '#5f7283',
+  OK: '#14a37f',
+  LOW: '#f2643d',
+  UNCONFIGURED: '#f2a20c',
 }
 
 const STATUS_ORDER: ReadonlyArray<StockStatus> = ['OK', 'LOW', 'UNCONFIGURED']
@@ -122,8 +140,9 @@ function tooltipFormatter(format: (value: number) => string, name: string) {
 }
 
 const tooltipStyle = {
-  border: '1px solid #cddde9',
-  borderRadius: 4,
+  border: '1px solid #d9d0ff',
+  borderRadius: 10,
+  boxShadow: '0 8px 24px rgb(91 75 240 / 15%)',
   fontSize: '0.85rem',
 }
 
@@ -218,11 +237,12 @@ export function AnalyticsPage() {
               >
                 <ResponsiveContainer width="100%" height={Math.max(160, areaByGlass.length * 36)}>
                   <BarChart data={areaByGlass} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 8 }}>
+                    <BarGradient id="bar-area" colors={chartGradients.area} />
                     <CartesianGrid horizontal={false} stroke={GRID_COLOR} />
                     <XAxis type="number" tick={{ fill: AXIS_COLOR, fontSize: 12 }} tickFormatter={(value: number) => areaFormatter.format(value)} />
                     <YAxis type="category" dataKey="label" width={150} tick={{ fill: AXIS_COLOR, fontSize: 12 }} />
-                    <Tooltip cursor={{ fill: 'rgb(47 85 127 / 8%)' }} contentStyle={tooltipStyle} formatter={tooltipFormatter(formatArea, 'Área disponível')} />
-                    <Bar dataKey="value" fill={BAR_COLOR} barSize={18} radius={[0, 4, 4, 0]} />
+                    <Tooltip cursor={{ fill: CURSOR_FILL }} contentStyle={tooltipStyle} formatter={tooltipFormatter(formatArea, 'Área disponível')} />
+                    <Bar dataKey="value" fill="url(#bar-area)" barSize={18} radius={[0, 8, 8, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -240,8 +260,8 @@ export function AnalyticsPage() {
                     <CartesianGrid vertical={false} stroke={GRID_COLOR} />
                     <XAxis dataKey="label" tick={{ fill: AXIS_COLOR, fontSize: 12 }} interval={0} />
                     <YAxis allowDecimals={false} tick={{ fill: AXIS_COLOR, fontSize: 12 }} />
-                    <Tooltip cursor={{ fill: 'rgb(47 85 127 / 8%)' }} contentStyle={tooltipStyle} formatter={tooltipFormatter(formatCount, 'Vidros')} />
-                    <Bar dataKey="value" barSize={40} radius={[4, 4, 0, 0]}>
+                    <Tooltip cursor={{ fill: CURSOR_FILL }} contentStyle={tooltipStyle} formatter={tooltipFormatter(formatCount, 'Vidros')} />
+                    <Bar dataKey="value" barSize={40} radius={[8, 8, 0, 0]}>
                       {stockByStatus.map((row) => <Cell key={row.status} fill={statusColors[row.status]} />)}
                     </Bar>
                   </BarChart>
@@ -258,11 +278,12 @@ export function AnalyticsPage() {
               >
                 <ResponsiveContainer width="100%" height={Math.max(160, glassesByFinish.length * 36)}>
                   <BarChart data={glassesByFinish} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 8 }}>
+                    <BarGradient id="bar-finish" colors={chartGradients.finish} />
                     <CartesianGrid horizontal={false} stroke={GRID_COLOR} />
                     <XAxis type="number" allowDecimals={false} tick={{ fill: AXIS_COLOR, fontSize: 12 }} />
                     <YAxis type="category" dataKey="label" width={120} tick={{ fill: AXIS_COLOR, fontSize: 12 }} />
-                    <Tooltip cursor={{ fill: 'rgb(47 85 127 / 8%)' }} contentStyle={tooltipStyle} formatter={tooltipFormatter(formatCount, 'Vidros')} />
-                    <Bar dataKey="value" fill={BAR_COLOR} barSize={18} radius={[0, 4, 4, 0]} />
+                    <Tooltip cursor={{ fill: CURSOR_FILL }} contentStyle={tooltipStyle} formatter={tooltipFormatter(formatCount, 'Vidros')} />
+                    <Bar dataKey="value" fill="url(#bar-finish)" barSize={18} radius={[0, 8, 8, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -277,11 +298,12 @@ export function AnalyticsPage() {
               >
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={priceByThickness} margin={{ top: 8, right: 8, bottom: 4, left: 8 }}>
+                    <BarGradient id="bar-price" colors={chartGradients.price} vertical />
                     <CartesianGrid vertical={false} stroke={GRID_COLOR} />
                     <XAxis dataKey="label" tick={{ fill: AXIS_COLOR, fontSize: 12 }} interval={0} />
                     <YAxis tick={{ fill: AXIS_COLOR, fontSize: 12 }} tickFormatter={(value: number) => currencyFormatter.format(value)} width={84} />
-                    <Tooltip cursor={{ fill: 'rgb(47 85 127 / 8%)' }} contentStyle={tooltipStyle} formatter={tooltipFormatter(formatPricePerSquareMeter, 'Preço médio')} />
-                    <Bar dataKey="value" fill={BAR_COLOR} barSize={32} radius={[4, 4, 0, 0]} />
+                    <Tooltip cursor={{ fill: CURSOR_FILL }} contentStyle={tooltipStyle} formatter={tooltipFormatter(formatPricePerSquareMeter, 'Preço médio')} />
+                    <Bar dataKey="value" fill="url(#bar-price)" barSize={32} radius={[8, 8, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>

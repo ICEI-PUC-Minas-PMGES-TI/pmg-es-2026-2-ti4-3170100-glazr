@@ -29,6 +29,25 @@
   --color-success: #27715e;
   --color-success-soft: #e4f3ee;
 
+  /* Acentos "prisma": a luz atravessando o vidro */
+  --accent-cyan: #0ea5c6;
+  --accent-cyan-soft: #e0f7fb;
+  --accent-violet: #7c5cff;
+  --accent-violet-soft: #efebff;
+  --accent-magenta: #e0458f;
+  --accent-magenta-soft: #fde9f3;
+  --accent-amber: #f2a20c;
+  --accent-amber-soft: #fff4dc;
+  --accent-coral: #f2643d;
+  --accent-coral-soft: #ffece6;
+  --accent-emerald: #14a37f;
+  --accent-emerald-soft: #ddf6ee;
+
+  --gradient-prism: linear-gradient(90deg, #0ea5c6 0%, #7c5cff 35%, #e0458f 65%, #f2a20c 100%);
+  --gradient-hero: linear-gradient(125deg, #0b2540 0%, #1e3a7a 38%, #5b3fd1 72%, #0ea5c6 120%);
+  --gradient-primary: linear-gradient(135deg, #1f6fd6 0%, #5b4bf0 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #1a5fbb 0%, #4c3bd9 100%);
+
   /* Glassmorphism & Transparências */
   --glass-bg: rgb(255 255 255 / 75%);
   --glass-bg-subtle: rgb(255 255 255 / 45%);

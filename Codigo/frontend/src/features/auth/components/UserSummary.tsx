@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { AlertTriangle, ArrowRight, Layers, Package, Shield, Users } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Boxes, Layers, Package, Shield, Users } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import { listLowStockAlerts, type GlassStockSummary } from '../../inventory/api/inventory-api'
 import './UserSummary.css'
@@ -27,6 +27,9 @@ export function UserSummary() {
   return (
     <section className="user-summary" aria-labelledby="welcome-title">
       <div className="user-summary__hero">
+        <div className="user-summary__shards" aria-hidden="true">
+          <span /><span /><span /><span />
+        </div>
         <div>
           <p className="eyebrow">Painel Principal</p>
           <h1 id="welcome-title">Olá, {user.displayName}</h1>
@@ -42,7 +45,8 @@ export function UserSummary() {
           {alertsUnavailable ? <p>Não foi possível consultar os alertas de estoque agora.</p> : null}
           {!alertsUnavailable && lowStock.length === 0 ? <p>Nenhum tipo de vidro atingiu o estoque mínimo.</p> : null}
           {!alertsUnavailable && lowStock.length > 0 ? <div className="inventory-dashboard__alerts">
-            <AlertTriangle size={20} aria-hidden="true" />
+            <span className="inventory-dashboard__alert-icon">
+            <AlertTriangle size={20} aria-hidden="true" /></span>
             <p><strong>{lowStock.length} tipo(s) de vidro</strong> estão no estoque mínimo ou abaixo dele.</p>
             <Link className="button button--secondary" to="/inventory">Ver estoque</Link>
           </div> : null}
@@ -51,7 +55,7 @@ export function UserSummary() {
         <h2 className="section-title">Módulos do Sistema</h2>
         <div className="shortcut-grid">
           {canManageUsers ? (
-            <Link to="/admin/users" className="shortcut-card">
+            <Link to="/admin/users" className="shortcut-card shortcut-card--violet">
               <div className="shortcut-card__header">
                 <div className="shortcut-card__icon">
                   <Users size={20} strokeWidth={2} />
@@ -70,7 +74,7 @@ export function UserSummary() {
           ) : null}
 
           {canManageGlasses ? (
-            <Link to="/glasses" className="shortcut-card">
+            <Link to="/glasses" className="shortcut-card shortcut-card--cyan">
               <div className="shortcut-card__header">
                 <div className="shortcut-card__icon">
                   <Layers size={20} strokeWidth={2} />
@@ -89,10 +93,10 @@ export function UserSummary() {
           ) : null}
 
           {canReadInventory ? (
-            <Link to="/inventory" className="shortcut-card">
+            <Link to="/inventory" className="shortcut-card shortcut-card--amber">
               <div className="shortcut-card__header">
                 <div className="shortcut-card__icon">
-                  <Layers size={20} strokeWidth={2} />
+                  <Boxes size={20} strokeWidth={2} />
                 </div>
                 <span className="shortcut-card__badge">Materiais</span>
               </div>
@@ -108,7 +112,7 @@ export function UserSummary() {
           ) : null}
 
           {canManageKits ? (
-            <Link to="/admin/kits" className="shortcut-card">
+            <Link to="/admin/kits" className="shortcut-card shortcut-card--magenta">
               <div className="shortcut-card__header">
                 <div className="shortcut-card__icon">
                   <Package size={20} strokeWidth={2} />
@@ -126,7 +130,7 @@ export function UserSummary() {
             </Link>
           ) : null}
 
-          <Link to="/account/security" className="shortcut-card">
+          <Link to="/account/security" className="shortcut-card shortcut-card--emerald">
             <div className="shortcut-card__header">
               <div className="shortcut-card__icon">
                 <Shield size={20} strokeWidth={2} />

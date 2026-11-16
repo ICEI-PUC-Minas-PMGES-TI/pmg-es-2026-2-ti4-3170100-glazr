@@ -6,15 +6,53 @@
 }
 
 .inventory-metric {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xs);
-  padding: 1rem;
-  background: rgb(255 255 255 / 62%);
+  --metric-accent: var(--accent-cyan);
+  --metric-accent-soft: var(--accent-cyan-soft);
+
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--metric-accent) 25%, transparent);
+  border-radius: 12px;
+  padding: 1rem 1.1rem 1rem 1.25rem;
+  background: linear-gradient(135deg, var(--metric-accent-soft), rgb(255 255 255 / 85%) 70%);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--metric-accent) 12%, transparent);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.inventory-metric::before {
+  position: absolute;
+  top: 0.9rem;
+  bottom: 0.9rem;
+  left: 0;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  content: "";
+  background: var(--metric-accent);
+}
+
+.inventory-metric:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px color-mix(in srgb, var(--metric-accent) 22%, transparent);
+}
+
+.inventory-metric:nth-child(4n + 2) {
+  --metric-accent: var(--accent-violet);
+  --metric-accent-soft: var(--accent-violet-soft);
+}
+
+.inventory-metric:nth-child(4n + 3) {
+  --metric-accent: var(--accent-coral);
+  --metric-accent-soft: var(--accent-coral-soft);
+}
+
+.inventory-metric:nth-child(4n + 4) {
+  --metric-accent: var(--accent-emerald);
+  --metric-accent-soft: var(--accent-emerald-soft);
 }
 
 .inventory-metric__label {
   display: block;
-  color: var(--color-text-muted);
+  color: color-mix(in srgb, var(--metric-accent) 70%, #33475b);
   font-family: var(--font-heading);
   font-size: 0.72rem;
   font-weight: 800;
@@ -27,7 +65,7 @@
   margin-top: 0.25rem;
   color: var(--color-blue-950);
   font-family: var(--font-heading);
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 750;
 }
 
@@ -65,9 +103,23 @@
 
 .inventory-action-panel {
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-xs);
+  border-top: 3px solid var(--accent-cyan);
+  border-radius: 12px;
   padding: 1.15rem;
-  background: rgb(255 255 255 / 56%);
+  background: rgb(255 255 255 / 70%);
+  box-shadow: var(--shadow-sm);
+}
+
+.inventory-action-panel:nth-child(2n) {
+  border-top-color: var(--accent-violet);
+}
+
+.inventory-action-panel:nth-child(3n) {
+  border-top-color: var(--accent-amber);
+}
+
+.inventory-action-panel:nth-child(4n) {
+  border-top-color: var(--accent-magenta);
 }
 
 .inventory-action-panel h2 {
@@ -98,13 +150,15 @@
 
 .inventory-empty {
   margin-top: 1rem;
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-xs);
+  border: 1px dashed color-mix(in srgb, var(--accent-violet) 40%, transparent);
+  border-radius: 12px;
   padding: 1rem;
+  background: rgb(124 92 255 / 4%);
 }
 
 .inventory-row-selected {
-  background: var(--color-blue-050);
+  background: var(--accent-violet-soft);
+  box-shadow: inset 3px 0 0 var(--accent-violet);
 }
 
 .inventory-sheet-action {
