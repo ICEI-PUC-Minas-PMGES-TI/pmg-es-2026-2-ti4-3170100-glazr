@@ -4,10 +4,13 @@ import com.glazr.accessprofile.infrastructure.AccessProfileEntity;
 import com.glazr.credential.infrastructure.ExternalIdentityEntity;
 import com.glazr.credential.infrastructure.ExternalIdentityRepository;
 import com.glazr.credential.infrastructure.PasswordCredentialRepository;
+import com.glazr.invitation.infrastructure.EmployeeInvitationEntity;
 import com.glazr.invitation.infrastructure.EmployeeInvitationRepository;
 import com.glazr.user.infrastructure.UserEntity;
 import com.glazr.user.infrastructure.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.Clock;
@@ -15,15 +18,48 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class GoogleIdentityServiceTest {
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void consumesInvitationWithASingleLockedLookup(boolean alreadyLinked) {
+        Instant now = Instant.parse("2026-08-31T12:00:00Z");
+        UserEntity user = UserEntity.createEmployee("person@example.com", "Person",
+                Set.of(AccessProfileEntity.create("Operador", null, Set.of(), now)), now);
+        EmployeeInvitationEntity invitation = EmployeeInvitationEntity.create(user.getId(), UUID.randomUUID(),
+                "a".repeat(64), now.plusSeconds(3600), now);
+        UserRepository users = mock(UserRepository.class);
+        ExternalIdentityRepository identities = mock(ExternalIdentityRepository.class);
+        EmployeeInvitationRepository invitations = mock(EmployeeInvitationRepository.class);
+        when(users.findByIdForUpdate(user.getId())).thenReturn(Optional.of(user));
+        when(invitations.findByIdForUpdate(invitation.getId())).thenReturn(Optional.of(invitation));
+        if (alreadyLinked) {
+            when(identities.findByProviderAndSubjectForUpdate(ExternalIdentityEntity.GOOGLE, "google-sub"))
+                    .thenReturn(Optional.of(ExternalIdentityEntity.linkGoogle(
+                            user.getId(), "google-sub", user.getEmail(), now)));
+        } else {
+            when(identities.saveAndFlush(any(ExternalIdentityEntity.class))).thenAnswer(call -> call.getArgument(0));
+        }
+        GoogleIdentityService service = new GoogleIdentityService(users, identities,
+                mock(PasswordCredentialRepository.class), invitations, Clock.fixed(now, ZoneOffset.UTC));
+
+        var authenticated = service.authenticate("google-sub", user.getEmail(), true, invitation.getId(), null);
+
+        assertThat(authenticated.id()).isEqualTo(user.getId());
+        assertThat(invitation.getConsumedAt()).isEqualTo(now);
+        verify(invitations).findByIdForUpdate(invitation.getId());
+        verifyNoMoreInteractions(invitations);
+    }
+
     @Test
     void linksGoogleToThePreexistingEmployeeWithoutCreatingAnotherUser() {
         Instant now = Instant.parse("2026-08-31T12:00:00Z");

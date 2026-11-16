@@ -50,12 +50,15 @@ public class GoogleIdentityService {
         ExternalIdentityEntity identity = identities
                 .findByProviderAndSubjectForUpdate(ExternalIdentityEntity.GOOGLE, subject).orElse(null);
         UserEntity user;
+        EmployeeInvitationEntity invitation;
         if (identity != null) {
             user = requireEligibleLocked(identity.getUserId());
             if (!user.getEmail().equals(email)) throw emailMismatch();
             if (expectedUserId != null && !expectedUserId.equals(user.getId())) throw alreadyLinked();
+            invitation = findInvitationIfPresent(invitationId);
         } else {
-            user = resolveExpectedUser(email, invitationId, expectedUserId);
+            invitation = findInvitationIfPresent(invitationId);
+            user = resolveExpectedUser(email, invitation, expectedUserId);
             ExternalIdentityEntity existingForUser = identities
                     .findByUserIdAndProviderForUpdate(user.getId(), ExternalIdentityEntity.GOOGLE).orElse(null);
             if (existingForUser != null && !existingForUser.getSubject().equals(subject)) throw alreadyLinked();
@@ -71,17 +74,20 @@ public class GoogleIdentityService {
             }
         }
         identity.recordLogin(now);
-        consumeInvitationIfPresent(user.getId(), invitationId, now);
+        consumeInvitation(user.getId(), invitation, now);
         EnumSet<AuthenticationMethod> methods = EnumSet.of(AuthenticationMethod.GOOGLE);
         if (passwords.existsById(user.getId())) methods.add(AuthenticationMethod.PASSWORD);
         return AuthenticatedUserFactory.from(user, methods);
     }
 
-    private UserEntity resolveExpectedUser(String email, UUID invitationId, UUID expectedUserId) {
+    private EmployeeInvitationEntity findInvitationIfPresent(UUID invitationId) {
+        return invitationId == null ? null : invitations.findByIdForUpdate(invitationId)
+                .orElseThrow(this::authenticationFailed);
+    }
+
+    private UserEntity resolveExpectedUser(String email, EmployeeInvitationEntity invitation, UUID expectedUserId) {
         UUID targetId = expectedUserId;
-        if (invitationId != null) {
-            EmployeeInvitationEntity invitation = invitations.findByIdForUpdate(invitationId)
-                    .orElseThrow(this::authenticationFailed);
+        if (invitation != null) {
             if (invitation.statusAt(clock.instant()) != InvitationStatus.PENDING) throw authenticationFailed();
             targetId = invitation.getUserId();
         }
@@ -98,10 +104,8 @@ public class GoogleIdentityService {
         return user;
     }
 
-    private void consumeInvitationIfPresent(UUID userId, UUID invitationId, java.time.Instant now) {
-        if (invitationId != null) {
-            EmployeeInvitationEntity invitation = invitations.findByIdForUpdate(invitationId)
-                    .orElseThrow(this::authenticationFailed);
+    private void consumeInvitation(UUID userId, EmployeeInvitationEntity invitation, java.time.Instant now) {
+        if (invitation != null) {
             if (!invitation.getUserId().equals(userId) || invitation.statusAt(now) != InvitationStatus.PENDING) {
                 throw authenticationFailed();
             }
